@@ -1,7 +1,7 @@
-package io.mosip.esignet.mock.integration.service;
+package io.mosip.esignet.sunbird.integration.service;
 
 import io.mosip.esignet.api.spi.CaptchaValidator;
-import io.mosip.esignet.mock.integration.dto.ReCaptchaResponse;
+import io.mosip.esignet.sunbird.integration.dto.ReCaptchaResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

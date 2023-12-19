@@ -1,4 +1,4 @@
-package io.mosip.esignet.mock.integration.dto;
+package io.mosip.esignet.sunbird.integration.dto;
 
 
 import lombok.Data;

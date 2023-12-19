@@ -1,4 +1,4 @@
-package io.mosip.esignet.mock.integration.service;
+package io.mosip.esignet.sunbird.integration.service;
 
 import io.mosip.esignet.api.dto.AuditDTO;
 import io.mosip.esignet.api.spi.AuditPlugin;

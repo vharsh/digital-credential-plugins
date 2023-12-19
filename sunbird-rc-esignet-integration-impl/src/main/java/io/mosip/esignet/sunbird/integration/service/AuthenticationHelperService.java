@@ -1,4 +1,4 @@
-package io.mosip.esignet.mock.integration.service;
+package io.mosip.esignet.sunbird.integration.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,9 +6,9 @@ import io.mosip.esignet.api.dto.*;
 import io.mosip.esignet.api.exception.KycAuthException;
 import io.mosip.esignet.api.exception.SendOtpException;
 import io.mosip.esignet.api.util.ErrorConstants;
-import io.mosip.esignet.mock.integration.dto.InsurenceResponceDto;
-import io.mosip.esignet.mock.integration.dto.KycAuthRequestDto;
-import io.mosip.esignet.mock.integration.dto.SearchRequestDto;
+import io.mosip.esignet.sunbird.integration.dto.InsurenceResponceDto;
+import io.mosip.esignet.sunbird.integration.dto.KycAuthRequestDto;
+import io.mosip.esignet.sunbird.integration.dto.SearchRequestDto;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.signature.dto.JWTSignatureRequestDto;
 import io.mosip.kernel.signature.dto.JWTSignatureResponseDto;
@@ -58,80 +58,17 @@ public class AuthenticationHelperService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final Map<String, List<String>> supportedKycAuthFormats = new HashMap<>();
-
-    static {
-        supportedKycAuthFormats.put("OTP", List.of("alpha-numeric"));
-        supportedKycAuthFormats.put("PIN", List.of("number"));
-        supportedKycAuthFormats.put("BIO", List.of("encoded-json"));
-        supportedKycAuthFormats.put("WLA", List.of("jwt"));
-    }
-
-
-    public static String b64Encode(String value) {
-        return urlSafeEncoder.encodeToString(value.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public static long getEpochSeconds() {
-        return ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond();
-    }
 
     protected static LocalDateTime getUTCDateTime() {
         return ZonedDateTime
                 .now(ZoneOffset.UTC).toLocalDateTime();
     }
 
-    protected String getRequestSignature(String request) {
-        JWTSignatureRequestDto jwtSignatureRequestDto = new JWTSignatureRequestDto();
-        jwtSignatureRequestDto.setApplicationId(OIDC_PARTNER_APP_ID);
-        jwtSignatureRequestDto.setReferenceId("");
-        jwtSignatureRequestDto.setIncludePayload(false);
-        jwtSignatureRequestDto.setIncludeCertificate(true);
-        jwtSignatureRequestDto.setDataToSign(AuthenticationHelperService.b64Encode(request));
-        JWTSignatureResponseDto responseDto = signatureService.jwtSign(jwtSignatureRequestDto);
-        log.debug("Request signature ---> {}", responseDto.getJwtSignedData());
-        return responseDto.getJwtSignedData();
-    }
-
     public boolean isSupportedOtpChannel(String channel) {
         return channel != null && otpChannels.contains(channel.toLowerCase());
     }
 
-    public SendOtpResult sendOtpMock(String transactionId, String individualId, List<String> otpChannels, String relyingPartyId, String clientId)
-            throws SendOtpException {
-        try {
-            var sendOtpDto = new SendOtpDto();
-            sendOtpDto.setTransactionId(transactionId);
-            sendOtpDto.setIndividualId(individualId);
-            sendOtpDto.setOtpChannels(otpChannels);
-            String requestBody = objectMapper.writeValueAsString(sendOtpDto);
-            RequestEntity requestEntity = RequestEntity
-                    .post(UriComponentsBuilder.fromUriString(sendOtpUrl).pathSegment(relyingPartyId,
-                            clientId).build().toUri())
-                    .contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .body(requestBody);
-            ResponseEntity<ResponseWrapper<SendOtpResult>> responseEntity = restTemplate.exchange(requestEntity,
-                    new ParameterizedTypeReference<>() {
-                    });
 
-            if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                ResponseWrapper<SendOtpResult> responseWrapper = responseEntity.getBody();
-                if (responseWrapper.getResponse() != null) {
-                    return responseWrapper.getResponse();
-                }
-                log.error("Errors in response received from IDA send Otp: {}", responseWrapper.getErrors());
-                if (!CollectionUtils.isEmpty(responseWrapper.getErrors())) {
-                    throw new SendOtpException(responseWrapper.getErrors().get(0).getErrorCode());
-                }
-            }
-            throw new SendOtpException(ErrorConstants.SEND_OTP_FAILED);
-        } catch (SendOtpException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("send otp failed", e);
-            throw new SendOtpException("send_otp_failed: " + e.getMessage());
-        }
-    }
 
     public KycAuthResult doKycAuthImpl(String relyingPartyId, String clientId, KycAuthDto kycAuthDto)
             throws KycAuthException {
@@ -214,8 +151,4 @@ public class AuthenticationHelperService {
         throw new KycAuthException(ErrorConstants.AUTH_FAILED);
     }
 
-//    private boolean isKycAuthFormatSupported(String authFactorType, String kycAuthFormat) {
-//        var supportedFormat = supportedKycAuthFormats.get(authFactorType);
-//        return supportedFormat != null && supportedFormat.contains(kycAuthFormat);
-//    }
 }

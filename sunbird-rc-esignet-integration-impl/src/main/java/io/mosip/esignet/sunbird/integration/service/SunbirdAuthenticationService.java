@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package io.mosip.esignet.mock.integration.service;
+package io.mosip.esignet.sunbird.integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.esignet.api.dto.*;
@@ -12,7 +12,8 @@ import io.mosip.esignet.api.exception.KycExchangeException;
 import io.mosip.esignet.api.exception.SendOtpException;
 import io.mosip.esignet.api.spi.Authenticator;
 import io.mosip.esignet.api.util.ErrorConstants;
-import io.mosip.esignet.mock.integration.dto.*;
+import io.mosip.esignet.sunbird.integration.dto.KycExchangeRequestDto;
+import io.mosip.esignet.sunbird.integration.dto.KycExchangeResponseDto;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.util.StringUtils;
 import io.mosip.kernel.keymanagerservice.dto.AllCertificatesDataResponseDto;
@@ -45,7 +46,6 @@ import java.util.*;
 public class SunbirdAuthenticationService implements Authenticator {
 
     private static final String APPLICATION_ID = "MOCK_AUTHENTICATION_SERVICE";
-    public static final String SEND_OTP_FAILED = "send_otp_failed";
 
     @Value("${mosip.esignet.mock.authenticator.kyc-exchange-url}")
     private String kycExchangeUrl;
@@ -123,12 +123,8 @@ public class SunbirdAuthenticationService implements Authenticator {
     @Override
     public SendOtpResult sendOtp(String relyingPartyId, String clientId, SendOtpDto sendOtpDto)
             throws SendOtpException {
-        if (sendOtpDto == null || StringUtils.isEmpty(sendOtpDto.getTransactionId())) {
-            throw new SendOtpException("invalid_transaction_id");
+        return null;
         }
-
-        return authenticationHelperService.sendOtpMock(sendOtpDto.getTransactionId(), sendOtpDto.getIndividualId(), sendOtpDto.getOtpChannels(), relyingPartyId, clientId);
-    }
 
     @Override
     public boolean isSupportedOtpChannel(String channel) {
