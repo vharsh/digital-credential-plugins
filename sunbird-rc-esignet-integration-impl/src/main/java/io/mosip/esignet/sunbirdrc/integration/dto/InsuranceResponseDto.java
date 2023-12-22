@@ -1,11 +1,11 @@
-package io.mosip.esignet.sunbird.integration.dto;
+package io.mosip.esignet.sunbirdrc.integration.dto;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class InsurenceResponceDto {
+public class InsuranceResponseDto {
     private List<String> benefits;
     private String gender;
     private String policyName;

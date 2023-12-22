@@ -1,4 +1,4 @@
-package io.mosip.esignet.sunbird.integration.dto;
+package io.mosip.esignet.sunbirdrc.integration.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
