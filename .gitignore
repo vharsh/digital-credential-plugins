@@ -32,5 +32,3 @@ target/
 .setting/
 .mvn/
 .project/
-helm/*/Chart.lock
-helm/*/charts/

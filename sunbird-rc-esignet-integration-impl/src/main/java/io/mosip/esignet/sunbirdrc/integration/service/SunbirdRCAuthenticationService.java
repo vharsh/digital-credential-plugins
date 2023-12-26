@@ -167,9 +167,10 @@ public class SunbirdRCAuthenticationService implements Authenticator {
                     kycAuthResult.setKycToken((String)responseList.get(0).get(osid));
                     kycAuthResult.setPartnerSpecificUserToken((String)responseList.get(0).get(idField));
                     return kycAuthResult;
+                }else{
+                    log.error("Getting more then one response and the size of response is " ,responseList.size());
+                    throw new KycAuthException(ErrorConstants.AUTH_FAILED );
                 }
-                log.error("Error response received from Sunbird Registry, Errors: {}");
-                throw new KycAuthException(ErrorConstants.AUTH_FAILED );
             }
 
         } catch (Exception e) {
