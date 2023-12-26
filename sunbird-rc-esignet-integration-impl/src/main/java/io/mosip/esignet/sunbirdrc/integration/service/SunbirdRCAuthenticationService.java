@@ -15,7 +15,6 @@ import io.mosip.esignet.api.exception.SendOtpException;
 import io.mosip.esignet.api.spi.Authenticator;
 import io.mosip.esignet.api.util.ErrorConstants;
 import io.mosip.esignet.sunbirdrc.integration.dto.FieldDetail;
-import io.mosip.esignet.sunbirdrc.integration.dto.InsuranceResponseDto;
 import io.mosip.esignet.sunbirdrc.integration.dto.RegistrySearchRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +56,8 @@ public class SunbirdRCAuthenticationService implements Authenticator {
 
     @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-fields}")
     private String idField;
+
+    private final String osid="osid";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -157,14 +158,14 @@ public class SunbirdRCAuthenticationService implements Authenticator {
                     .post(UriComponentsBuilder.fromUriString(registrySearchUrl).build().toUri())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .body(requestBody);
-            ResponseEntity<List<InsuranceResponseDto>> responseEntity = restTemplate.exchange(requestEntity,
-                    new ParameterizedTypeReference<List<InsuranceResponseDto>>() {});
+            ResponseEntity<List<Map<String,Object>>> responseEntity = restTemplate.exchange(requestEntity,
+                    new ParameterizedTypeReference<List<Map<String,Object>>>() {});
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-                List<InsuranceResponseDto> responseList = responseEntity.getBody();
+                List<Map<String,Object>> responseList = responseEntity.getBody();
                 if(responseList.size()==1){
-                    log.info("getting response {}",responseEntity);
-                    kycAuthResult.setKycToken(responseList.get(0).getOsid());
-                    kycAuthResult.setPartnerSpecificUserToken(responseList.get(0).getPolicyNumber());
+                    log.debug("getting response {}", responseEntity);
+                    kycAuthResult.setKycToken((String)responseList.get(0).get(osid));
+                    kycAuthResult.setPartnerSpecificUserToken((String)responseList.get(0).get(idField));
                     return kycAuthResult;
                 }
                 log.error("Error response received from Sunbird Registry, Errors: {}");

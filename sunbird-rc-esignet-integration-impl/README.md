@@ -1,8 +1,8 @@
-# mock-esignet-integration-impl
+# sunbird-rc-esignet-integration-impl
 
 ## About
 
-Implementation for all the interfaces defined in esignet-integration-api. This libaray is built as a wrapper for [mock-identity-system](mock-identity-system) service.
+Implementation for all the interfaces defined in esignet-integration-api. This libaray is built as a wrapper for [sunbird-registry-system](sunbird-registry-url) service.
 
 This library should be added as a runtime dependency to [esignet-service](https://github.com/mosip/esignet) for development purpose only.
 Note: This is not production use implementation.
@@ -10,35 +10,43 @@ Note: This is not production use implementation.
 ## Configurations required to added in esignet-default.properties
 
 ````
-mosip.esignet.integration.scan-base-package=io.mosip.esignet.mock.integration
-mosip.esignet.integration.authenticator=MockAuthenticationService
+mosip.esignet.integration.scan-base-package=io.mosip.esignet.sunbirdrc.integration
+mosip.esignet.integration.authenticator=SunbirdRCAuthenticationService
+mosip.esignet.integration.vci-plugin=SunbirdRCVCIssuancePlugin
 mosip.esignet.integration.key-binder=MockKeyBindingWrapperService
 mosip.esignet.integration.audit-plugin=LoggerAuditService
 mosip.esignet.integration.captcha-validator=GoogleRecaptchaValidatorService
 
-mosip.esignet.send-otp.captcha-required=true
+
 mosip.esignet.captcha-validator.url=https://www.google.com/recaptcha/api/siteverify
 mosip.esignet.captcha-validator.secret=${esignet.captcha.secret.key}
 mosip.esignet.captcha-validator.site-key=${esignet.captcha.site.key}
 
-mosip.esignet.mock.authenticator.get-identity-url=https://${mosip.api.public.host}/v1/mock-identity-system/identity
-mosip.esignet.mock.authenticator.kyc-auth-url=https://${mosip.api.public.host}/v1/mock-identity-system/kyc-auth
-mosip.esignet.mock.authenticator.kyc-exchange-url=https://${mosip.api.public.host}/v1/mock-identity-system/kyc-exchange
-mosip.esignet.mock.authenticator.send-otp=https://${mosip.api.public.host}/v1/mock-identity-system/send-otp
-mosip.esignet.mock.supported.bind-auth-factor-types={'WLA'}
-mosip.esignet.mock.authenticator.ida.otp-channels=email,phone
+##--------------------sunbird registry auntentication releted demo configuration-------------------------##
+
+mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field='policyNumber'
+mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details={{"id":"policyNumber", "type":"text", "format":""},{"id":"name", "type":"text", "format":""},{"id":"dob", "type":"date", "format":"dd/mm/yyyy"}}
+mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url=http://10.3.148.107/registry/api/v1/Insurance/search
+
+##-----------------------------VCI releted demo configuration---------------------------------------------##
+
+mosip.esignet.vciplugin.sunbird-rc.issue-credential-url=http://164.52.205.87/credentials/issue 
+mosip.esignet.vciplugin.sunbird-rc.supported-credential-types=InsuranceCredential,HealthCardCredential
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.static-value-map.issuerId=did:web:esignet-mock.dev.mosip.net
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.template-url=requestTemplete.json
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-get-url=http://10.3.148.107/api/v1/Insurance/
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.cred-schema-id=did:schema:1e4d93df-4047-4dd7-8515-9ad46796009f
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.cred-schema-version=1.0.0
+mosip.esignet.vciplugin.sunbird-rc.credential-type.HealthCardCredential.static-value-map.issuerId=did:web:esignet-mock.dev.mosip.net
+mosip.esignet.vciplugin.sunbird-rc.credential-type.HealthCardCredential.template-url=requestTemplete.json
+mosip.esignet.vciplugin.sunbird-rc.credential-type.HealthCardCredential.registry-get-url=http://10.3.148.107/api/v1/Insurance/
+mosip.esignet.vciplugin.sunbird-rc.credential-type.HealthCardCredential.cred-schema-id=did:schema:1e4d93df-4047-4dd7-8515-9ad46796009f
+mosip.esignet.vciplugin.sunbird-rc.credential-type.HealthCardCredential.cred-schema-version=1.0.0
 ````
+
 
 Add "bindingtransaction" cache name in "mosip.esignet.cache.names" property.
 
-## Databases
-Below two entries need to be added in mosip_esignet.key_policy_def table.
-
-```
-INSERT INTO KEY_POLICY_DEF(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('MOCK_AUTHENTICATION_SERVICE', 1095, 50, 'NA', true, 'mosipadmin', now());
-
-INSERT INTO KEY_POLICY_DEF(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('MOCK_BINDING_SERVICE', 1095, 50, 'NA', true, 'mosipadmin', now());
-```
-
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
+This SunbirdRC plugin is compatible with [Esignet 1.2.1-SNAPSHOT](https://github.com/mosip/esignet/blob/ES-496/) 

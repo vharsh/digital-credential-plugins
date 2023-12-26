@@ -22,7 +22,7 @@ import io.mosip.esignet.api.spi.VCIssuancePlugin;
 import lombok.extern.slf4j.Slf4j;
 
 
-@ConditionalOnProperty(value = "mosip.esignet.integration.vci-plugin", havingValue = "MockVCIssuancePlugin")
+@ConditionalOnProperty(value = "mosip.esignet.integration.vci-plugin", havingValue = "SunbirdRCVCIssuancePlugin")
 @Component
 @Slf4j
 public class MockVCIssuancePlugin implements VCIssuancePlugin {
