@@ -184,7 +184,7 @@ public class SunbirdRCAuthenticationService implements Authenticator {
             }else{
                 if(!challengeMap.containsKey(fieldDetailMap.get(Search_Field_Id)))
                 {
-                    log.error("Field '{}' is missing in the challenge.", fieldDetailMap.get(""));
+                    log.error("Field '{}' is missing in the challenge.", fieldDetailMap.get(Search_Field_Id));
                     throw new KycAuthException(ErrorConstants.AUTH_FAILED );
                 }
                 hashMap.put(Filter_Operator,challengeMap.get(fieldDetailMap.get(Search_Field_Id)));
