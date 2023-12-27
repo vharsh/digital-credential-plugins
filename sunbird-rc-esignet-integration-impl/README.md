@@ -1,11 +1,9 @@
 # sunbird-rc-esignet-integration-impl
 
 ## About
-
 Implementation for all the interfaces defined in esignet-integration-api. This libaray is built as a wrapper for [sunbird-registry-system](sunbird-registry-url) service.
 
-This library should be added as a runtime dependency to [esignet-service](https://github.com/mosip/esignet) for development purpose only.
-Note: This is not production use implementation.
+This library should be added as a runtime dependency to [esignet-service](https://github.com/mosip/esignet)
 
 ## Configurations required to added in esignet-default.properties
 
@@ -22,13 +20,14 @@ mosip.esignet.captcha-validator.url=https://www.google.com/recaptcha/api/sitever
 mosip.esignet.captcha-validator.secret=${esignet.captcha.secret.key}
 mosip.esignet.captcha-validator.site-key=${esignet.captcha.site.key}
 
-##--------------------sunbird registry auntentication releted demo configuration-------------------------##
+##--------------------sunbird registry authentication related demo configuration-------------------------##
 
 mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field='policyNumber'
 mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details={{"id":"policyNumber", "type":"text", "format":""},{"id":"name", "type":"text", "format":""},{"id":"dob", "type":"date", "format":"dd/mm/yyyy"}}
 mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url=http://10.3.148.107/registry/api/v1/Insurance/search
+mosip.esignet.authenticator.sunbird-rc.kba.entity-id-field=osid
 
-##-----------------------------VCI releted demo configuration---------------------------------------------##
+##-----------------------------VCI related demo configuration---------------------------------------------##
 
 mosip.esignet.vciplugin.sunbird-rc.issue-credential-url=http://164.52.205.87/credentials/issue 
 mosip.esignet.vciplugin.sunbird-rc.supported-credential-types=InsuranceCredential,HealthCardCredential
@@ -49,4 +48,4 @@ Add "bindingtransaction" cache name in "mosip.esignet.cache.names" property.
 
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
-This SunbirdRC plugin is compatible with [Esignet 1.2.1-SNAPSHOT](https://github.com/mosip/esignet/blob/ES-496/) 
+This SunbirdRC plugin is compatible with [eSignet 1.2.0](https://github.com/mosip/esignet) 

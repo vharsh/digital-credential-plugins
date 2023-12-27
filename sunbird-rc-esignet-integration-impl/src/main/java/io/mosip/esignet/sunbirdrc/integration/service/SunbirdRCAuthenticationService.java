@@ -5,8 +5,8 @@
  */
 package io.mosip.esignet.sunbirdrc.integration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.esignet.api.dto.*;
 import io.mosip.esignet.api.exception.KycAuthException;
@@ -36,9 +36,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 
@@ -47,33 +44,48 @@ import java.util.*;
 @Slf4j
 public class SunbirdRCAuthenticationService implements Authenticator {
 
+    private final String filterOperator="eq";
+
+    private List<FieldDetail> fieldDetailList;
 
     @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url}")
     private String registrySearchUrl;
 
-    @Value("${mosip.esignet.authenticator.default.auth-factor.kba.field.key:eq}")
-    private String fieldKey;
-
     @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-fields}")
     private String idField;
 
-    private final String osid="osid";
+    @Value("${mosip.esignet.authenticator.sunbird-rc.kba.entity-id-field}")
+    private String entityIdField;
+
+    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-detailss}")
+    private String fieldDetails;
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
-    private Environment env;
+    Environment env;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    protected static LocalDateTime getUTCDateTime() {
-        return ZonedDateTime
-                .now(ZoneOffset.UTC).toLocalDateTime();
-    }
 
     @PostConstruct
-    public void initialize() {
-        log.info("Started to setup Sunbird-RC");
+    public void initialize() throws KycAuthException {
+        log.info("Started to setup Sunbird-RC Authenticator");
+        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field");
+        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url");
+        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details");
+        fieldDetails=env.getProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-detailss");
+        try{
+            fieldDetailList = objectMapper.readValue(fieldDetails, new TypeReference<List<FieldDetail>>(){});
+        }catch (JsonProcessingException e){
+            if(fieldDetailList==null || fieldDetailList.isEmpty()){
+                log.error("Invalid configuration for field-detaisl: {} ",e);
+                throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
+            }
+        }
+
     }
 
     @Validated
@@ -125,34 +137,13 @@ public class SunbirdRCAuthenticationService implements Authenticator {
 
         KycAuthResult  kycAuthResult= new KycAuthResult();
         RegistrySearchRequestDto registrySearchRequestDto =new RegistrySearchRequestDto();
-        registrySearchRequestDto.setLimit(2);
-        registrySearchRequestDto.setOffset(0);
-        Map<String,Map<String,String>> filter=new HashMap<>();
         String encodedChallenge=authChallenge.getChallenge();
 
         byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedChallenge);
         String challenge = new String(decodedBytes, StandardCharsets.UTF_8);
 
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(challenge);
-
-            String fieldDetails =env.getProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-detailss");
-            List<FieldDetail> fieldDetailList = objectMapper.readValue(fieldDetails, new TypeReference<List<FieldDetail>>(){});
-
-            for(FieldDetail fieldDetail:fieldDetailList){
-                Map<String,String> hashMap=new HashMap<>();
-
-                if(!StringUtils.isEmpty(idField) && fieldDetail.getId().equals(idField)){
-                    hashMap.put(fieldKey,individualId);
-
-                }else{
-                    hashMap.put(fieldKey,jsonNode.get(fieldDetail.getId()).asText());
-                }
-                filter.put(fieldDetail.getId(),hashMap);
-            }
-            registrySearchRequestDto.setFilters(filter);
-
+            registrySearchRequestDto =createRegistrySearchRequestDto(challenge,individualId);
             String requestBody = objectMapper.writeValueAsString(registrySearchRequestDto);
             RequestEntity requestEntity = RequestEntity
                     .post(UriComponentsBuilder.fromUriString(registrySearchUrl).build().toUri())
@@ -163,21 +154,61 @@ public class SunbirdRCAuthenticationService implements Authenticator {
             if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
                 List<Map<String,Object>> responseList = responseEntity.getBody();
                 if(responseList.size()==1){
+                    //TODO  This need to be removed since it can contain PII
                     log.debug("getting response {}", responseEntity);
-                    kycAuthResult.setKycToken((String)responseList.get(0).get(osid));
-                    kycAuthResult.setPartnerSpecificUserToken((String)responseList.get(0).get(idField));
+                    kycAuthResult.setKycToken((String)responseList.get(0).get(entityIdField));
+                    kycAuthResult.setPartnerSpecificUserToken((String)responseList.get(0).get(entityIdField));
                     return kycAuthResult;
                 }else{
-                    log.error("Getting more then one response and the size of response is " ,responseList.size());
+                    log.error("Registry search returns more than one match, so authentication is considered as failed. Result size: " + responseList.size());
                     throw new KycAuthException(ErrorConstants.AUTH_FAILED );
                 }
+            }else {
+                log.error("Sunbird service is not running. Status Code: " ,responseEntity.getStatusCode());
+                throw new KycAuthException(ErrorConstants.AUTH_FAILED);
             }
 
         } catch (Exception e) {
             log.error("Failed to do the Authentication: {}",e);
             throw new KycAuthException(ErrorConstants.AUTH_FAILED );
         }
-        throw new KycAuthException(ErrorConstants.AUTH_FAILED);
+    }
+
+    private RegistrySearchRequestDto createRegistrySearchRequestDto(String challenge, String individualId) throws KycAuthException, JsonProcessingException {
+        RegistrySearchRequestDto registrySearchRequestDto =new RegistrySearchRequestDto();
+        registrySearchRequestDto.setLimit(2);
+        registrySearchRequestDto.setOffset(0);
+        Map<String,Map<String,String>> filter=new HashMap<>();
+
+        Map<String, String> challengeMap = objectMapper.readValue(challenge, new TypeReference<Map<String, String>>() {});
+        fieldDetailList = objectMapper.readValue(fieldDetails, new TypeReference<List<FieldDetail>>(){});
+
+        for(FieldDetail fieldDetail:fieldDetailList){
+            Map<String,String> hashMap=new HashMap<>();
+
+            if(!StringUtils.isEmpty(idField) && fieldDetail.getId().equals(idField)){
+                hashMap.put(filterOperator,individualId);
+
+            }else{
+                if(!challengeMap.containsKey(fieldDetail.getId()))
+                {
+                    log.error("Field '{}' is missing in the challenge.", fieldDetail.getId());
+                    throw new KycAuthException(ErrorConstants.AUTH_FAILED );
+                }
+                hashMap.put(filterOperator,challengeMap.get(fieldDetail.getId()));
+            }
+            filter.put(fieldDetail.getId(),hashMap);
+        }
+        registrySearchRequestDto.setFilters(filter);
+        return registrySearchRequestDto;
+    }
+
+    private void validateProperty(String propertyName) throws KycAuthException {
+        String propertyValue = env.getProperty(propertyName);
+        if (propertyValue == null || propertyValue.isEmpty()) {
+            log.error("Field not configured: {}",propertyName);
+            throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
+        }
     }
 
 }
