@@ -6,20 +6,10 @@
 package io.mosip.esignet.sunbirdrc.integration.service;
 
 
-import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 import io.mosip.esignet.api.exception.VCIExchangeException;
 import io.mosip.esignet.api.util.ErrorConstants;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import foundation.identity.jsonld.JsonLDObject;
 import io.mosip.esignet.api.dto.VCRequestDto;

@@ -14,7 +14,6 @@ import io.mosip.esignet.api.exception.KycExchangeException;
 import io.mosip.esignet.api.exception.SendOtpException;
 import io.mosip.esignet.api.spi.Authenticator;
 import io.mosip.esignet.api.util.ErrorConstants;
-import io.mosip.esignet.sunbirdrc.integration.dto.FieldDetail;
 import io.mosip.esignet.sunbirdrc.integration.dto.RegistrySearchRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +43,21 @@ import java.util.*;
 @Slf4j
 public class SunbirdRCAuthenticationService implements Authenticator {
 
-    private final String filterOperator="eq";
+    private final String Filter_Operator="eq";
 
-    private List<FieldDetail> fieldDetailList;
+    private final String Search_Field_Id="id";
+
+    @Value("#{${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details}}")
+    private List<Map<String,String>> fieldDetailList;
 
     @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url}")
     private String registrySearchUrl;
 
-    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-fields}")
+    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field}")
     private String idField;
 
     @Value("${mosip.esignet.authenticator.sunbird-rc.kba.entity-id-field}")
     private String entityIdField;
-
-    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-detailss}")
-    private String fieldDetails;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -76,16 +75,11 @@ public class SunbirdRCAuthenticationService implements Authenticator {
         validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field");
         validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url");
         validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details");
-        fieldDetails=env.getProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-detailss");
-        try{
-            fieldDetailList = objectMapper.readValue(fieldDetails, new TypeReference<List<FieldDetail>>(){});
-        }catch (JsonProcessingException e){
-            if(fieldDetailList==null || fieldDetailList.isEmpty()){
-                log.error("Invalid configuration for field-detaisl: {} ",e);
-                throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
-            }
-        }
 
+        if(fieldDetailList==null || fieldDetailList.isEmpty()){
+            log.error("Invalid configuration for field-detaisl");
+            throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
+        }
     }
 
     @Validated
@@ -181,23 +175,21 @@ public class SunbirdRCAuthenticationService implements Authenticator {
         Map<String,Map<String,String>> filter=new HashMap<>();
 
         Map<String, String> challengeMap = objectMapper.readValue(challenge, new TypeReference<Map<String, String>>() {});
-        fieldDetailList = objectMapper.readValue(fieldDetails, new TypeReference<List<FieldDetail>>(){});
 
-        for(FieldDetail fieldDetail:fieldDetailList){
+
+        for(Map<String,String> fieldDetailMap: fieldDetailList) {
             Map<String,String> hashMap=new HashMap<>();
-
-            if(!StringUtils.isEmpty(idField) && fieldDetail.getId().equals(idField)){
-                hashMap.put(filterOperator,individualId);
-
+            if(!StringUtils.isEmpty(idField) && fieldDetailMap.get(Search_Field_Id).equals(idField)){
+                hashMap.put(Filter_Operator,individualId);
             }else{
-                if(!challengeMap.containsKey(fieldDetail.getId()))
+                if(!challengeMap.containsKey(fieldDetailMap.get(Search_Field_Id)))
                 {
-                    log.error("Field '{}' is missing in the challenge.", fieldDetail.getId());
+                    log.error("Field '{}' is missing in the challenge.", fieldDetailMap.get(""));
                     throw new KycAuthException(ErrorConstants.AUTH_FAILED );
                 }
-                hashMap.put(filterOperator,challengeMap.get(fieldDetail.getId()));
+                hashMap.put(Filter_Operator,challengeMap.get(fieldDetailMap.get(Search_Field_Id)));
             }
-            filter.put(fieldDetail.getId(),hashMap);
+            filter.put(fieldDetailMap.get(Search_Field_Id),hashMap);
         }
         registrySearchRequestDto.setFilters(filter);
         return registrySearchRequestDto;
