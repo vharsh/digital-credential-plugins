@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -43,9 +42,9 @@ import java.util.*;
 @Slf4j
 public class SunbirdRCAuthenticationService implements Authenticator {
 
-    private final String Filter_Operator="eq";
+    private final String FILTER_EQUALS_OPERATOR="eq";
 
-    private final String Search_Field_Id="id";
+    private final String FIELD_ID_KEY="id";
 
     @Value("#{${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details}}")
     private List<Map<String,String>> fieldDetailList;
@@ -63,22 +62,26 @@ public class SunbirdRCAuthenticationService implements Authenticator {
     private RestTemplate restTemplate;
 
     @Autowired
-    Environment env;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
 
     @PostConstruct
     public void initialize() throws KycAuthException {
         log.info("Started to setup Sunbird-RC Authenticator");
-        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.individual-id-field");
-        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url");
-        validateProperty("mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details");
-
+        boolean individualIdFieldIsValid = false;
         if(fieldDetailList==null || fieldDetailList.isEmpty()){
-            log.error("Invalid configuration for field-detaisl");
+            log.error("Invalid configuration for field-details");
             throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
+        }
+        for (Map<String, String> field : fieldDetailList) {
+            if (field.containsKey(FIELD_ID_KEY) && field.get(FIELD_ID_KEY).equals(idField)) {
+                individualIdFieldIsValid = true;
+                break;
+            }
+        }
+        if (!individualIdFieldIsValid) {
+            log.error("Invalid configuration: The 'individual-id-field' '{}' is not available in 'field-details'.", idField);
+            throw new KycAuthException("Invalid configuration: individual-id-field is not available in field-details.");
         }
     }
 
@@ -179,28 +182,19 @@ public class SunbirdRCAuthenticationService implements Authenticator {
 
         for(Map<String,String> fieldDetailMap: fieldDetailList) {
             Map<String,String> hashMap=new HashMap<>();
-            if(!StringUtils.isEmpty(idField) && fieldDetailMap.get(Search_Field_Id).equals(idField)){
-                hashMap.put(Filter_Operator,individualId);
+            if(!StringUtils.isEmpty(idField) && fieldDetailMap.get(FIELD_ID_KEY).equals(idField)){
+                hashMap.put(FILTER_EQUALS_OPERATOR,individualId);
             }else{
-                if(!challengeMap.containsKey(fieldDetailMap.get(Search_Field_Id)))
+                if(!challengeMap.containsKey(fieldDetailMap.get(FIELD_ID_KEY)))
                 {
-                    log.error("Field '{}' is missing in the challenge.", fieldDetailMap.get(Search_Field_Id));
+                    log.error("Field '{}' is missing in the challenge.", fieldDetailMap.get(FIELD_ID_KEY));
                     throw new KycAuthException(ErrorConstants.AUTH_FAILED );
                 }
-                hashMap.put(Filter_Operator,challengeMap.get(fieldDetailMap.get(Search_Field_Id)));
+                hashMap.put(FILTER_EQUALS_OPERATOR,challengeMap.get(fieldDetailMap.get(FIELD_ID_KEY)));
             }
-            filter.put(fieldDetailMap.get(Search_Field_Id),hashMap);
+            filter.put(fieldDetailMap.get(FIELD_ID_KEY),hashMap);
         }
         registrySearchRequestDto.setFilters(filter);
         return registrySearchRequestDto;
     }
-
-    private void validateProperty(String propertyName) throws KycAuthException {
-        String propertyValue = env.getProperty(propertyName);
-        if (propertyValue == null || propertyValue.isEmpty()) {
-            log.error("Field not configured: {}",propertyName);
-            throw new KycAuthException("sunbird-rc authenticator field is not configured properly");
-        }
-    }
-
 }
