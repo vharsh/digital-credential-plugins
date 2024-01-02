@@ -48,6 +48,6 @@ Add "bindingtransaction" cache name in "mosip.esignet.cache.names" property.
 
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
-This integration plugin is compatible with eSignet 1.2.0 and Sunbird-RC 1.0.0
+This integration plugin is compatible with [eSignet 1.2.0](https://github.com/mosip/esignet/tree/v1.2.0) and [Sunbird-RC 1.0.0](https://github.com/Sunbird-RC/sunbird-rc-core/tree/v1.0.0)
 
 
