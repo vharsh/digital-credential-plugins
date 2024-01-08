@@ -18,7 +18,6 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +181,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             requestMap.put("credentialSchemaVersion",configMap.get(CRED_SCHEMA_VESRION));
             requestMap.put("tags",new ArrayList<>());
         }catch (JsonProcessingException e){
-            log.error("Error while parsing the templete ",e);
+            log.error("Error while parsing the template ",e);
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
         //TODO  This need to be removed since it can contain PII
@@ -245,8 +244,8 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         try{
             StringWriter writer = new StringWriter();
             template.merge(new VelocityContext(),writer);
-            Map<String,Object> tempMap= mapper.readValue(writer.toString(),Map.class);
-            List<String> contextList=(List<String>)tempMap.get("@context");
+            Map<String,Object> templateMap = mapper.readValue(writer.toString(),Map.class);
+            List<String> contextList=(List<String>) templateMap.get("@context");
             for(String contextUrl:vcRequestContextList){
                 if(!contextList.contains(contextUrl)){
                     log.error("ContextUrl is not supported");
