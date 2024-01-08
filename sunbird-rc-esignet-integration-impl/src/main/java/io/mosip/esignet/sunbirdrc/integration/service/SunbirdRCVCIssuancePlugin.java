@@ -18,6 +18,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,7 +163,6 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         Map<String,Object> requestMap=new HashMap<>();
         context.put("currentDate", LocalDateTime.now());
         context.put("issuerId", configMap.get(STATIC_VALUE_MAP_ISSUER_ID));
-        context.put("id",holderId);
         for (Map.Entry<String, Object> entry : registryObjectMap.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
@@ -176,6 +176,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         template.merge(context, writer);
         try{
             Map<String,Object> credentialObject =mapper.readValue(writer.toString(),Map.class);
+            ((Map<String, Object>) credentialObject.get("credentialSubject")).put("id", holderId);
             requestMap.put("credential", credentialObject);
             requestMap.put("credentialSchemaId",configMap.get(CRED_SCHEMA_ID));
             requestMap.put("credentialSchemaVersion",configMap.get(CRED_SCHEMA_VESRION));
