@@ -6,7 +6,11 @@
 package io.mosip.esignet.sunbirdrc.integration.service;
 
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -17,6 +21,7 @@ import io.mosip.esignet.api.util.ErrorConstants;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
 import org.json.JSONArray;
@@ -83,10 +88,21 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     @PostConstruct
     public  void initialize() throws VCIExchangeException {
-
         vEngine = new VelocityEngine();
+        URLResourceLoader urlResourceLoader = new URLResourceLoader() {
+            @Override
+            public InputStream getResourceStream(String name) throws ResourceNotFoundException {
+                try {
+                    URL url = new URL(name);
+                    URLConnection connection = url.openConnection();
+                    return connection.getInputStream();
+                } catch (IOException e) {
+                    throw new ResourceNotFoundException("Unable to find resource '" + name + "'");
+                }
+            }
+        };
         vEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "url");
-        vEngine.setProperty("url.resource.loader.class", URLResourceLoader.class.getName());
+        vEngine.setProperty("url.resource.loader.instance", urlResourceLoader);
         vEngine.init();
         //Validate all the supported VC
         for (String credentialType : supportedCredentialTypes) {
