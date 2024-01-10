@@ -6,7 +6,6 @@
 package io.mosip.esignet.sunbirdrc.integration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.esignet.api.dto.*;
 import io.mosip.esignet.api.exception.KycAuthException;
@@ -177,7 +176,7 @@ public class SunbirdRCAuthenticationService implements Authenticator {
         registrySearchRequestDto.setOffset(0);
         Map<String,Map<String,String>> filter=new HashMap<>();
 
-        Map<String, String> challengeMap = objectMapper.readValue(challenge, new TypeReference<Map<String, String>>() {});
+        Map<String, String> challengeMap = objectMapper.readValue(challenge, Map.class);
 
 
         for(Map<String,String> fieldDetailMap: fieldDetailList) {
