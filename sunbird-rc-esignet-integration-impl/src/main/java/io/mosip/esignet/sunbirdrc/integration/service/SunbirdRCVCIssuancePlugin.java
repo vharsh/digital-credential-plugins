@@ -64,8 +64,6 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     private static final String STATIC_VALUE_MAP_ISSUER_ID = "static-value-map.issuerId";
 
-    private static final String CREDENTIAL_OBJECT_KEY = "credential";
-
     @Autowired
     Environment env;
 
@@ -146,7 +144,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         Map<String,Object> vcResponseMap =sendCredentialIssueRequest(credentialRequestMap);
 
         VCResult vcResult = new VCResult();
-        JsonLDObject vcJsonLdObject = JsonLDObject.fromJsonObject(vcResponseMap.get(CREDENTIAL_OBJECT_KEY));
+        JsonLDObject vcJsonLdObject = JsonLDObject.fromJsonObject(vcResponseMap);
         vcResult.setCredential(vcJsonLdObject);
         vcResult.setFormat(LINKED_DATA_PROOF_VC_FORMAT);
         return vcResult;
@@ -274,5 +272,12 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             log.error("Error while parsing the template ",e);
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
+    }
+
+    private static Date calculateNowPlus30Days() {
+        // Implement your logic to calculate current date + 30 days
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 30);
+        return calendar.getTime();
     }
 }
