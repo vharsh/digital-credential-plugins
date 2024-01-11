@@ -146,7 +146,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         Map<String,Object> vcResponseMap =sendCredentialIssueRequest(credentialRequestMap);
 
         VCResult vcResult = new VCResult();
-        JsonLDObject vcJsonLdObject = JsonLDObject.fromJsonObject(vcResponseMap.get(CREDENTIAL_OBJECT_KEY));
+        JsonLDObject vcJsonLdObject = JsonLDObject.fromJsonObject((Map<String, Object>)vcResponseMap.get(CREDENTIAL_OBJECT_KEY));
         vcResult.setCredential(vcJsonLdObject);
         vcResult.setFormat(LINKED_DATA_PROOF_VC_FORMAT);
         return vcResult;
