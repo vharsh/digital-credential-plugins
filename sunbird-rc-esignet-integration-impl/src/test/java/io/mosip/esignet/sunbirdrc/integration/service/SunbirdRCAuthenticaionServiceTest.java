@@ -5,6 +5,7 @@ import io.mosip.esignet.api.dto.*;
 import io.mosip.esignet.api.exception.KycAuthException;
 import io.mosip.esignet.api.exception.KycExchangeException;
 import io.mosip.esignet.api.exception.SendOtpException;
+import io.mosip.esignet.api.exception.VCIExchangeException;
 import io.mosip.esignet.api.util.ErrorConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -22,6 +23,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,27 +46,26 @@ public class SunbirdRCAuthenticaionServiceTest {
 
 
     @Test
-    public void initializeWithValidConfig_thenPass() {
+    public void initializeWithValidConfig_thenPass() throws KycAuthException {
 
         List<Map<String,String>> fieldDetailList = List.of(Map.of("id","policyNumber","type","string","format","string"));
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "fieldDetailList", fieldDetailList);
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "idField", "policyNumber");
+        ReflectionTestUtils.invokeMethod(sunbirdRCAuthenticationService, "initialize");
 
-        try{
-            sunbirdRCAuthenticationService.initialize();
-        }catch (Exception e){
-            log.error("Exception occurred while initializing SunbirdRCAuthenticationService",e);
-        }
     }
 
     @Test
     public void initializeWithInValidConfig_thenFail() {
-       try{
-            sunbirdRCAuthenticationService.initialize();
-            Assert.fail();
-        }catch (KycAuthException e){
-            Assert.assertEquals(e.getErrorCode(),"sunbird-rc authenticator field is not configured properly");
-        }
+
+        Throwable thrownException = Assert.assertThrows(Throwable.class,
+                () -> ReflectionTestUtils.invokeMethod(sunbirdRCAuthenticationService, "initialize"));
+
+
+        Assert.assertTrue(thrownException instanceof UndeclaredThrowableException);
+        Throwable actualException = ((UndeclaredThrowableException) thrownException).getUndeclaredThrowable();
+        Assert.assertTrue(actualException instanceof KycAuthException);
+        Assert.assertEquals("sunbird-rc authenticator field is not configured properly", actualException.getMessage());
     }
 
     @Test
@@ -71,21 +73,30 @@ public class SunbirdRCAuthenticaionServiceTest {
         List<Map<String,String>> fieldDetailList = List.of(Map.of("id","policyNumber","type","string","format","string"));
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "fieldDetailList", fieldDetailList);
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "idField", "policyNumber2");
-        try{
-            sunbirdRCAuthenticationService.initialize();
-            Assert.fail();
-        }catch (KycAuthException e){
-            Assert.assertEquals(e.getErrorCode(),"Invalid configuration: individual-id-field is not available in field-details.");
-        }
+        Throwable thrownException = Assert.assertThrows(Throwable.class,
+                () -> ReflectionTestUtils.invokeMethod(sunbirdRCAuthenticationService, "initialize"));
+
+
+        Assert.assertTrue(thrownException instanceof UndeclaredThrowableException);
+        Throwable actualException = ((UndeclaredThrowableException) thrownException).getUndeclaredThrowable();
+        Assert.assertTrue(actualException instanceof KycAuthException);
+        Assert.assertEquals("Invalid configuration: individual-id-field is not available in field-details.", actualException.getMessage());
+
     }
 
     @Test
-    public void doKycAuthWithValidParams_thenPass() throws KycAuthException, IOException {
+    public void doKycAuthWithValidParams_thenPass() throws KycAuthException, IOException, NoSuchFieldException, IllegalAccessException {
         List<Map<String,String>> fieldDetailList = List.of(Map.of("id","policyNumber","type","string","format","string"),Map.of("id","fullName","type","string","format","string"));
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "fieldDetailList", fieldDetailList);
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "idField", "policyNumber");
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "registrySearchUrl", "url");
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "entityIdField", "policyNumber");
+       // ReflectionTestUtils.setField(sunbirdRCAuthenticationService,"objectMapper",objectMapper);
+
+//        Field objectMapperField = SunbirdRCAuthenticationService.class.getDeclaredField("objectMapper");
+//        objectMapperField.setAccessible(true);
+//        objectMapperField.set(sunbirdRCAuthenticationService, objectMapper);
+
         // Arrange
         String relyingPartyId = "validRelayingPartyId";
         String clientId = "validClientId";
@@ -98,7 +109,8 @@ public class SunbirdRCAuthenticaionServiceTest {
         kycAuthDto.setChallengeList(List.of(authChallenge));
         kycAuthDto.setIndividualId("000000");
 
-        List<Map<String,Object>> responseMap=new ArrayList<>();Map<String,Object> map=Map.of("policyNumber","654321","dob","654321");
+        List<Map<String,Object>> responseMap=new ArrayList<>();
+        Map<String,Object> map=Map.of("policyNumber","000000","dob","2000-07-26");
         responseMap.add(map);
         ResponseEntity<List<Map<String,Object>>>  responseEntity = new ResponseEntity(responseMap, HttpStatus.OK);
         Mockito.when(restTemplate.exchange(
@@ -107,7 +119,8 @@ public class SunbirdRCAuthenticaionServiceTest {
         )).thenReturn(responseEntity);
 
         Map<String,String> mockChallengMap=new HashMap<>();
-        mockChallengMap.put("fullName","test");
+        mockChallengMap.put("fullName","Zaid Siddique");
+        mockChallengMap.put("dob","2000-07-26");
         Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(mockChallengMap);
 
 
@@ -130,13 +143,14 @@ public class SunbirdRCAuthenticaionServiceTest {
         AuthChallenge authChallenge=new AuthChallenge();
         authChallenge.setFormat("string");
         authChallenge.setAuthFactorType("KBA");
-        authChallenge.setChallenge("eyJmdWxsTmFtZSI6IlphaWQgU2lkZGlxdWUiLCJkb2IiOiIyMDAwLTA3LTI2In0=");
+        authChallenge.setChallenge("eyJmdWxsTmFtZSI6IlphaWQiLCJkb2IiOiIyMDAwLTA3LTI2In0=");
 
         kycAuthDto.setChallengeList(List.of(authChallenge));
         kycAuthDto.setIndividualId("000000");
 
         Map<String,String> mockChallengMap=new HashMap<>();
-        mockChallengMap.put("id","fullname");
+        mockChallengMap.put("fullName","Zaid");
+        mockChallengMap.put("dob","2000-07-26");
         Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(mockChallengMap);
 
         try{
@@ -215,7 +229,8 @@ public class SunbirdRCAuthenticaionServiceTest {
         )).thenReturn(responseEntity);
 
         Map<String,String> mockChallengMap=new HashMap<>();
-        mockChallengMap.put("fullName","test");
+        mockChallengMap.put("fullName","Zaid Siddique");
+        mockChallengMap.put("dob","2000-07-26");
         Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(mockChallengMap);
 
 
