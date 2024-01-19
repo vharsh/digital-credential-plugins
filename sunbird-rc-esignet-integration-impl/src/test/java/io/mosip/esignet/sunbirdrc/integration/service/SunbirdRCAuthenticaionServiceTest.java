@@ -5,7 +5,6 @@ import io.mosip.esignet.api.dto.*;
 import io.mosip.esignet.api.exception.KycAuthException;
 import io.mosip.esignet.api.exception.KycExchangeException;
 import io.mosip.esignet.api.exception.SendOtpException;
-import io.mosip.esignet.api.exception.VCIExchangeException;
 import io.mosip.esignet.api.util.ErrorConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -90,12 +89,7 @@ public class SunbirdRCAuthenticaionServiceTest {
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "fieldDetailList", fieldDetailList);
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "idField", "policyNumber");
         ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "registrySearchUrl", "url");
-        ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "entityIdField", "policyNumber");
-       // ReflectionTestUtils.setField(sunbirdRCAuthenticationService,"objectMapper",objectMapper);
-
-//        Field objectMapperField = SunbirdRCAuthenticationService.class.getDeclaredField("objectMapper");
-//        objectMapperField.setAccessible(true);
-//        objectMapperField.set(sunbirdRCAuthenticationService, objectMapper);
+        ReflectionTestUtils.setField(sunbirdRCAuthenticationService, "entityIdField", "policyNumber");;
 
         // Arrange
         String relyingPartyId = "validRelayingPartyId";
