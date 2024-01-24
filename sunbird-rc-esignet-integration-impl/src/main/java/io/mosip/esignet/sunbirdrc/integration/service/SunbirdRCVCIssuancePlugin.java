@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +23,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
+import org.apache.velocity.tools.generic.DateTool;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -178,7 +178,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         StringWriter writer = new StringWriter();
         VelocityContext context = new VelocityContext();
         Map<String,Object> requestMap=new HashMap<>();
-        context.put("currentDate", LocalDateTime.now());
+        context.put("date", new DateTool());
         context.put("issuerId", configMap.get(STATIC_VALUE_MAP_ISSUER_ID));
         for (Map.Entry<String, Object> entry : registryObjectMap.entrySet()) {
             String key = entry.getKey();
