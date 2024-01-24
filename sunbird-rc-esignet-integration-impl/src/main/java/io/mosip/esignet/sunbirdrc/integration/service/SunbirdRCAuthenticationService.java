@@ -65,7 +65,7 @@ public class SunbirdRCAuthenticationService implements Authenticator {
 
 
     @PostConstruct
-    private void initialize() throws KycAuthException {
+    public void initialize() throws KycAuthException {
         log.info("Started to setup Sunbird-RC Authenticator");
         boolean individualIdFieldIsValid = false;
         if(fieldDetailList==null || fieldDetailList.isEmpty()){
