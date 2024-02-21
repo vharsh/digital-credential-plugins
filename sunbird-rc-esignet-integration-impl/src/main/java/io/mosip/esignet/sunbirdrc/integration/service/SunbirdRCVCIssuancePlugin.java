@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.esignet.api.exception.VCIExchangeException;
 import io.mosip.esignet.api.util.ErrorConstants;
+import io.mosip.esignet.sunbirdrc.integration.dto.RegistrySearchRequestDto;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -66,6 +67,10 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     private static final String CREDENTIAL_OBJECT_KEY = "credential";
 
+    private final String FILTER_EQUALS_OPERATOR="eq";
+
+    private final String PSUT_TOKEN="psut";
+
     @Autowired
     Environment env;
 
@@ -77,6 +82,12 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     @Value("${mosip.esignet.vciplugin.sunbird-rc.issue-credential-url}")
     String issueCredentialUrl;
+
+    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url}")
+    private String registrySearchUrl;
+
+    @Value("${mosip.esignet.vciplugin.sunbird-rc.use-psut}")
+    private boolean usePsut;
 
     @Value("#{'${mosip.esignet.vciplugin.sunbird-rc.supported-credential-types}'.split(',')}")
     List<String> supportedCredentialTypes;
@@ -135,13 +146,19 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             Template template=credentialTypeTemplates.get(supportedType);
             validateContextUrl(template,contextList);
         }
-        String osid = (identityDetails.containsKey("sub")) ? (String) identityDetails.get("sub") : null;
-        if (osid == null) {
-            log.error("Invalid request: osid is null");
+
+        String registrySearchField = (identityDetails.containsKey("sub")) ? (String) identityDetails.get("sub") : null;
+        if (registrySearchField == null) {
+            log.error("Invalid request: registrySearchField is null");
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
-        String registryUrl=credentialTypeConfigMap.get(requestedCredentialType).get(REGISTRY_GET_URL);
-        Map<String,Object> responseRegistryMap =fetchRegistryObject(registryUrl+osid);
+        Map<String,Object> responseRegistryMap;
+        if(usePsut){
+            responseRegistryMap= fetchRegistryObjectByPSUT(registrySearchUrl,registrySearchField);
+        }else {
+            String registryUrl=credentialTypeConfigMap.get(requestedCredentialType).get(REGISTRY_GET_URL);
+            responseRegistryMap =fetchRegistryObject(registryUrl+ registrySearchField);
+        }
         Map<String,Object> credentialRequestMap = createCredentialIssueRequest(requestedCredentialType, responseRegistryMap,vcRequestDto,holderId);
         Map<String,Object> vcResponseMap =sendCredentialIssueRequest(credentialRequestMap);
 
@@ -151,7 +168,6 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         vcResult.setFormat(LINKED_DATA_PROOF_VC_FORMAT);
         return vcResult;
     }
-
 
     @Override
     public VCResult<String> getVerifiableCredential(VCRequestDto vcRequestDto, String holderId, Map<String, Object> identityDetails) throws VCIExchangeException {
@@ -169,6 +185,40 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             log.error("Sunbird service is not running. Status Code: " ,responseEntity.getStatusCode());
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
+    }
+
+    private Map<String, Object> fetchRegistryObjectByPSUT(String registrySearchUrl, String psut) throws VCIExchangeException {
+
+        RegistrySearchRequestDto registrySearchRequestDto=new RegistrySearchRequestDto();
+        registrySearchRequestDto.setOffset(0);
+        registrySearchRequestDto.setLimit(2);
+        Map<String,Map<String,String>> filter=new HashMap<>();
+        Map<String,String> fullName=new HashMap<>();
+        fullName.put(FILTER_EQUALS_OPERATOR,psut);
+        filter.put(PSUT_TOKEN,fullName);
+        registrySearchRequestDto.setFilters(filter);
+
+        RequestEntity requestEntity =RequestEntity.post(UriComponentsBuilder.fromUriString(registrySearchUrl).build().toUri())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .body(registrySearchRequestDto);
+
+        ResponseEntity<List<Map<String,Object>>> responseEntity = restTemplate.exchange(requestEntity,
+                new ParameterizedTypeReference<List<Map<String,Object>>>() {});
+        if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
+            List<Map<String,Object>> responseList = responseEntity.getBody();
+            if(responseList.size()==1){
+                //TODO  This need to be removed since it can contain PII
+                log.debug("getting response {}", responseEntity);
+                return responseEntity.getBody().get(0);
+            }else{
+                log.error("Registry search returns more than one match, so authentication is considered as failed. Result size: " + responseList.size());
+                throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED );
+            }
+        }else {
+            log.error("Sunbird service is not running. Status Code: " ,responseEntity.getStatusCode());
+            throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
+        }
+
     }
 
     private Map<String,Object> createCredentialIssueRequest(String requestedCredentialType, Map<String,Object> registryObjectMap, VCRequestDto vcRequestDto, String holderId) throws VCIExchangeException {
