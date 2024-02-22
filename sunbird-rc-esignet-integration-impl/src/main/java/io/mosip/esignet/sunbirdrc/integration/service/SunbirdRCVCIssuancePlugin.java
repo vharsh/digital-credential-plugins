@@ -83,11 +83,11 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
     @Value("${mosip.esignet.vciplugin.sunbird-rc.issue-credential-url}")
     String issueCredentialUrl;
 
-    @Value("${mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.registry-search-url}")
+    @Value("${mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-search-url}")
     private String registrySearchUrl;
 
-    @Value("${mosip.esignet.vciplugin.sunbird-rc.use-psut}")
-    private boolean usePsut;
+    @Value("${mosip.esignet.vciplugin.sunbird-rc.enable-psut-based-registry-search:false}")
+    private boolean enablePSUTBasedRegistrySearch;
 
     @Value("#{'${mosip.esignet.vciplugin.sunbird-rc.supported-credential-types}'.split(',')}")
     List<String> supportedCredentialTypes;
@@ -153,7 +153,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
         Map<String,Object> responseRegistryMap;
-        if(usePsut){
+        if(enablePSUTBasedRegistrySearch){
             responseRegistryMap= fetchRegistryObjectByPSUT(registrySearchUrl,registrySearchField);
         }else {
             String registryUrl=credentialTypeConfigMap.get(requestedCredentialType).get(REGISTRY_GET_URL);
@@ -187,15 +187,15 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         }
     }
 
-    private Map<String, Object> fetchRegistryObjectByPSUT(String registrySearchUrl, String psut) throws VCIExchangeException {
+    private Map<String, Object> fetchRegistryObjectByPSUT(String registrySearchUrl, String psuToken) throws VCIExchangeException {
 
         RegistrySearchRequestDto registrySearchRequestDto=new RegistrySearchRequestDto();
         registrySearchRequestDto.setOffset(0);
         registrySearchRequestDto.setLimit(2);
         Map<String,Map<String,String>> filter=new HashMap<>();
-        Map<String,String> fullName=new HashMap<>();
-        fullName.put(FILTER_EQUALS_OPERATOR,psut);
-        filter.put(PSUT_TOKEN,fullName);
+        Map<String,String> psut=new HashMap<>();
+        psut.put(FILTER_EQUALS_OPERATOR,psuToken);
+        filter.put(PSUT_TOKEN,psut);
         registrySearchRequestDto.setFilters(filter);
 
         RequestEntity requestEntity =RequestEntity.post(UriComponentsBuilder.fromUriString(registrySearchUrl).build().toUri())
@@ -209,11 +209,12 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             if(responseList.size()==1){
                 //TODO  This need to be removed since it can contain PII
                 log.debug("getting response {}", responseEntity);
-                return responseEntity.getBody().get(0);
             }else{
-                log.error("Registry search returns more than one match, so authentication is considered as failed. Result size: " + responseList.size());
-                throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED );
+                log.debug("Registry search returns more than one match,So taking the first. Result size: " + responseList.size());
+                log.debug("getting response {}", responseEntity);
+                //Todo  we should find a generic way to sort desc based on created date. The idea is we give out the most recent record as VC
             }
+            return responseList.get(0);
         }else {
             log.error("Sunbird service is not running. Status Code: " ,responseEntity.getStatusCode());
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
