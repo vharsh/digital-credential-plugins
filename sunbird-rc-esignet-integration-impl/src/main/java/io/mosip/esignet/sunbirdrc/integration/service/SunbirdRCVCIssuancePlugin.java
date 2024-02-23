@@ -59,6 +59,8 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     private static final String REGISTRY_GET_URL = "registry-get-url";
 
+    private static final String REGISTRY_SEARCH_URL= "registry-search-url";
+
     private static final String CRED_SCHEMA_ID = "cred-schema-id";
 
     private static final String CRED_SCHEMA_VESRION = "cred-schema-version";
@@ -82,9 +84,6 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
 
     @Value("${mosip.esignet.vciplugin.sunbird-rc.issue-credential-url}")
     String issueCredentialUrl;
-
-    @Value("${mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-search-url}")
-    private String registrySearchUrl;
 
     @Value("${mosip.esignet.vciplugin.sunbird-rc.enable-psut-based-registry-search:false}")
     private boolean enablePSUTBasedRegistrySearch;
@@ -154,6 +153,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         }
         Map<String,Object> responseRegistryMap;
         if(enablePSUTBasedRegistrySearch){
+            String registrySearchUrl=credentialTypeConfigMap.get(requestedCredentialType).get(REGISTRY_SEARCH_URL);
             responseRegistryMap= fetchRegistryObjectByPSUT(registrySearchUrl,registrySearchField);
         }else {
             String registryUrl=credentialTypeConfigMap.get(requestedCredentialType).get(REGISTRY_GET_URL);
@@ -187,15 +187,15 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         }
     }
 
-    private Map<String, Object> fetchRegistryObjectByPSUT(String registrySearchUrl, String psuToken) throws VCIExchangeException {
+    private Map<String, Object> fetchRegistryObjectByPSUT(String registrySearchUrl, String psut) throws VCIExchangeException {
 
         RegistrySearchRequestDto registrySearchRequestDto=new RegistrySearchRequestDto();
         registrySearchRequestDto.setOffset(0);
         registrySearchRequestDto.setLimit(2);
         Map<String,Map<String,String>> filter=new HashMap<>();
-        Map<String,String> psut=new HashMap<>();
-        psut.put(FILTER_EQUALS_OPERATOR,psuToken);
-        filter.put(PSUT_TOKEN,psut);
+        Map<String,String> psutFilter=new HashMap<>();
+        psutFilter.put(FILTER_EQUALS_OPERATOR,psut);
+        filter.put(PSUT_TOKEN,psutFilter);
         registrySearchRequestDto.setFilters(filter);
 
         RequestEntity requestEntity =RequestEntity.post(UriComponentsBuilder.fromUriString(registrySearchUrl).build().toUri())
@@ -288,6 +288,7 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
         validateAndLoadProperty(CREDENTIAL_TYPE_PROPERTY_PREFIX + "." + credentialType + "." + CRED_SCHEMA_ID,CRED_SCHEMA_ID,configMap);
         validateAndLoadProperty(CREDENTIAL_TYPE_PROPERTY_PREFIX + "." + credentialType + "." + CRED_SCHEMA_VESRION,CRED_SCHEMA_VESRION,configMap);
         validateAndLoadProperty(CREDENTIAL_TYPE_PROPERTY_PREFIX + "." + credentialType + "." + STATIC_VALUE_MAP_ISSUER_ID,STATIC_VALUE_MAP_ISSUER_ID,configMap);
+        validateAndLoadProperty(CREDENTIAL_TYPE_PROPERTY_PREFIX + "." + credentialType + "." + REGISTRY_SEARCH_URL,REGISTRY_SEARCH_URL,configMap);
 
         String templateUrl = env.getProperty(CREDENTIAL_TYPE_PROPERTY_PREFIX +"." + credentialType + "." + TEMPLATE_URL);
         validateAndCacheTemplate(templateUrl,credentialType);
