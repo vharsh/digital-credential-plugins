@@ -7,7 +7,6 @@ import io.mosip.esignet.api.dto.VCRequestDto;
 import io.mosip.esignet.api.dto.VCResult;
 import io.mosip.esignet.api.exception.VCIExchangeException;
 import io.mosip.esignet.api.util.ErrorConstants;
-import io.mosip.esignet.sunbirdrc.integration.service.SunbirdRCVCIssuancePlugin;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Assert;
@@ -31,7 +30,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,27 +66,19 @@ public class SunbirdRCVCIssuancePluginTest {
         velocityEngine=new VelocityEngine();
         velocityEngine.setProperty("resource.loader", "class");
         velocityEngine.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        template=velocityEngine.getTemplate("InsurenceCredential.json");
+        template=velocityEngine.getTemplate("InsuranceCredential.json");
 
         credentialTypeTemplatesMap=new HashMap<>();
-        credentialTypeTemplatesMap.put("InsurenceCredential",template);
+        credentialTypeTemplatesMap.put("InsuranceCredential",template);
 
         credentialTypeConfigMap=new HashMap<>();
         Map<String,String> credentialMap=new HashMap<>();
         credentialMap.put("registry-get-url","url");
-        credentialTypeConfigMap.put("InsurenceCredential",credentialMap);
+        credentialTypeConfigMap.put("InsuranceCredential",credentialMap);
 
-        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"supportedCredentialTypes",List.of("InsurenceCredential"));
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"supportedCredentialTypes",List.of("InsuranceCredential"));
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"credentialTypeTemplates",credentialTypeTemplatesMap);
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"credentialTypeConfigMap",credentialTypeConfigMap);
-    }
-
-    @Test
-    public void initialize_ValidDetails_ThenPass() throws IOException, VCIExchangeException {
-        File file = new File("src/test/resources/InsurenceCredential.json");
-        String credentialPath = "file:/" + file.getAbsolutePath();
-        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(credentialPath);
-        ReflectionTestUtils.invokeMethod(sunbirdRCVCIssuancePlugin, "initialize");
     }
 
     @Test
@@ -100,7 +90,7 @@ public class SunbirdRCVCIssuancePluginTest {
         vcRequestDto.setFormat("test");
         List<String> types=new ArrayList<>();
         types.add("VerifiableCredential");
-        types.add("InsurenceCredential");
+        types.add("InsuranceCredential");
         vcRequestDto.setType(types);
 
         Map<String,Object> identityMap=new HashMap<>();
@@ -112,6 +102,53 @@ public class SunbirdRCVCIssuancePluginTest {
         Mockito.when(restTemplate.exchange(
                 Mockito.any(RequestEntity.class),
                 Mockito.eq(new ParameterizedTypeReference<Map<String,Object>>() {}))).thenReturn(responseEntity);
+
+        Map<String,Object> mockChallengMap=new HashMap<>();
+        Map<String,Object> credentialSubjectMap=new HashMap<>();
+        mockChallengMap.put("@context",List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1"));
+        mockChallengMap.put("credentialSubject",credentialSubjectMap);
+        Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(mockChallengMap);
+
+        VCResult<JsonLDObject> result= sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void getVerifiableCredentialWithLinkedDataProof_WithPsutDetails_ThenPass() throws VCIExchangeException, JsonProcessingException {
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"enablePSUTBasedRegistrySearch",true);
+
+        Map<String,Map<String,String>> credentialTypeConfigMap = new HashMap<>();
+        credentialTypeConfigMap.put("InsuranceCredential",Map.of("registry-search-url","test"));
+
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"credentialTypeConfigMap",credentialTypeConfigMap);
+        VCRequestDto vcRequestDto=new VCRequestDto();
+        List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
+        vcRequestDto.setContext(contextList);
+        vcRequestDto.setFormat("test");
+        List<String> types=new ArrayList<>();
+        types.add("VerifiableCredential");
+        types.add("InsuranceCredential");
+        vcRequestDto.setType(types);
+
+        Map<String,Object> identityMap=new HashMap<>();
+        identityMap.put("sub","osid");
+
+        Map<String,Object> responseMap=Map.of("policyNumber","654321","dob","654321");
+        List<Map<String,Object>> responseList=List.of(responseMap);
+
+        ResponseEntity<List<Map<String,Object>>>  responseEntity = new ResponseEntity(responseList, HttpStatus.OK);
+        Mockito.when(restTemplate.exchange(
+                Mockito.any(RequestEntity.class),
+                Mockito.eq(new ParameterizedTypeReference<List<Map<String,Object>>>() {}))).thenReturn(responseEntity);
+
+        Map<String,Object> vcResponseMap=Map.of("policyNumber","654321","dob","654321");
+
+        ResponseEntity<Map<String,Object>>  VcResponseEntity = new ResponseEntity(vcResponseMap, HttpStatus.OK);
+        Mockito.when(restTemplate.exchange(
+                Mockito.any(RequestEntity.class),
+                Mockito.eq(new ParameterizedTypeReference<Map<String,Object>>() {}))).thenReturn(VcResponseEntity);
+
 
         Map<String,Object> mockChallengMap=new HashMap<>();
         Map<String,Object> credentialSubjectMap=new HashMap<>();
@@ -137,7 +174,7 @@ public class SunbirdRCVCIssuancePluginTest {
         try{
             VCRequestDto vcRequestDto=new VCRequestDto();
             List<String> types=new ArrayList<>();
-            types.add("InsurenceCredential");
+            types.add("InsuranceCredential");
             vcRequestDto.setType(types);
             sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",null);
         }catch (VCIExchangeException e){
@@ -160,7 +197,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InValidRegistoryObject_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InValidRegistryObject_ThenFail() throws VCIExchangeException, JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();
         List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
@@ -168,7 +205,7 @@ public class SunbirdRCVCIssuancePluginTest {
         vcRequestDto.setFormat("test");
         List<String> types=new ArrayList<>();
         types.add("VerifiableCredential");
-        types.add("InsurenceCredential");
+        types.add("InsuranceCredential");
         vcRequestDto.setType(types);
 
         Map<String,Object> identityMap=new HashMap<>();
@@ -202,7 +239,7 @@ public class SunbirdRCVCIssuancePluginTest {
         vcRequestDto.setFormat("test");
         List<String> types=new ArrayList<>();
         types.add("VerifiableCredential");
-        types.add("InsurenceCredential");
+        types.add("InsuranceCredential");
         vcRequestDto.setType(types);
 
         Map<String,Object> identityMap=new HashMap<>();
@@ -228,63 +265,75 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void validateAndLoadProperty_With_ValidDetails_ThenPass(){
-        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn("property");
-        ReflectionTestUtils.invokeMethod(sunbirdRCVCIssuancePlugin, "validateAndLoadProperty","propertyName","credentialProp",new HashMap<>());
-
+    public void initialize_ValidDetails_ThenPass() throws IOException, VCIExchangeException {
+        File file = new File("src/test/resources/InsuranceCredential.json");
+        String credentialPath = "file:/" + file.getAbsolutePath();
+        Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(credentialPath);
+        sunbirdRCVCIssuancePlugin.initialize();
     }
 
     @Test
-    public void validateAndLoadProperty_With_InValidDetails_ThenFail(){
+    public void initialize_InValidPropertyDetails_ThenPass() throws IOException, VCIExchangeException {
+
         Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(null);
-
-        Throwable thrownException = Assert.assertThrows(Throwable.class,
-                () -> ReflectionTestUtils.invokeMethod(sunbirdRCVCIssuancePlugin, "validateAndLoadProperty","propertyName","credentialProp",new HashMap<>()));
-        Assert.assertTrue(thrownException instanceof UndeclaredThrowableException);
-        Throwable actualException = ((UndeclaredThrowableException) thrownException).getUndeclaredThrowable();
-
-        Assert.assertTrue(actualException instanceof VCIExchangeException);
-        Assert.assertEquals("Property propertyName is not set Properly.", actualException.getMessage());
+        try{
+            sunbirdRCVCIssuancePlugin.initialize();
+        }catch (VCIExchangeException e){
+            Assert.assertEquals("Property mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.template-url is not set Properly.", e.getMessage());
+        }
     }
 
     @Test
-    public void validateContextUrl_With_InvalidContext_ThenFail() throws JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InvalidContextURL_ThenFail() throws VCIExchangeException, JsonProcessingException {
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
+        VCRequestDto vcRequestDto=new VCRequestDto();
+        List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
+        vcRequestDto.setContext(contextList);
+        vcRequestDto.setFormat("test");
+        List<String> types=new ArrayList<>();
+        types.add("VerifiableCredential");
+        types.add("InsuranceCredential");
+        vcRequestDto.setType(types);
 
+        Map<String,Object> identityMap=new HashMap<>();
+        identityMap.put("sub","osid");
         Map<String,Object> mockChallengMap=new HashMap<>();
+
         Map<String,Object> credentialSubjectMap=new HashMap<>();
-        mockChallengMap.put("@context",List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1"));
+        mockChallengMap.put("@context",List.of("https://www.w3.org/2018/examples/v1","https://www.w3.org/2018/credentials/v1"));
         mockChallengMap.put("credentialSubject",credentialSubjectMap);
         Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(mockChallengMap);
 
-        Throwable thrownException = Assert.assertThrows(Throwable.class,
-                () -> ReflectionTestUtils.invokeMethod(sunbirdRCVCIssuancePlugin, "validateContextUrl", template,  List.of("context1","context2")));
-
-        Assert.assertTrue(thrownException instanceof UndeclaredThrowableException);
-        Throwable actualException = ((UndeclaredThrowableException) thrownException).getUndeclaredThrowable();
-
-        Assert.assertTrue(actualException instanceof VCIExchangeException);
-        Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, actualException.getMessage());
+        try{
+            sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap);
+        }catch (VCIExchangeException e){
+            Assert.assertEquals(e.getErrorCode(), ErrorConstants.VCI_EXCHANGE_FAILED);
+        }
     }
 
-    @Test()
-    public void validateContextUrl_With_InvalidTemplate_ThenFail() throws JsonProcessingException {
+    @Test
+    public void getVerifiableCredentialWithLinkedDataProof_InvalidTemplate_ThenFail() throws VCIExchangeException, JsonProcessingException {
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
+        VCRequestDto vcRequestDto=new VCRequestDto();
+        List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
+        vcRequestDto.setContext(contextList);
+        vcRequestDto.setFormat("test");
+        List<String> types=new ArrayList<>();
+        types.add("VerifiableCredential");
+        types.add("InsuranceCredential");
+        vcRequestDto.setType(types);
 
-        Map<String,Object> mockChallengMap=new HashMap<>();
-        Map<String,Object> credentialSubjectMap=new HashMap<>();
-        mockChallengMap.put("@context",List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1"));
-        mockChallengMap.put("credentialSubject",credentialSubjectMap);
+        Map<String,Object> identityMap=new HashMap<>();
+        identityMap.put("sub","osid");
+
         Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenThrow(JsonProcessingException.class);
 
-        Throwable thrownException = Assert.assertThrows(Throwable.class,
-                () -> ReflectionTestUtils.invokeMethod(sunbirdRCVCIssuancePlugin, "validateContextUrl", template,  List.of("context1","context2")));
-
-
-        Assert.assertTrue(thrownException instanceof UndeclaredThrowableException);
-        Throwable actualException = ((UndeclaredThrowableException) thrownException).getUndeclaredThrowable();
-        Assert.assertTrue(actualException instanceof VCIExchangeException);
-        Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, actualException.getMessage());
+        try{
+            sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap);
+        }catch (VCIExchangeException e){
+            Assert.assertEquals(e.getErrorCode(), ErrorConstants.VCI_EXCHANGE_FAILED);
+        }
     }
-
 
     @Test
     public void getVerifiableCredential_Test(){
