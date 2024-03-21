@@ -17,11 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +27,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +54,6 @@ public class SunbirdRCVCIssuancePluginTest {
 
     private Map<String,Template> credentialTypeTemplatesMap;
 
-    @Autowired
-    private ResourceLoader resourceLoader;
     Template template;
 
     @Before
@@ -161,7 +156,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InValidRequest_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InValidRequest_ThenFail() {
         try{
             sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(null,"holderId",null);
         }catch (VCIExchangeException e){
@@ -170,7 +165,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_With_EmptyTypes_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_With_EmptyTypes_ThenFail()  {
         try{
             VCRequestDto vcRequestDto=new VCRequestDto();
             List<String> types=new ArrayList<>();
@@ -197,7 +192,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InValidRegistryObject_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InValidRegistryObject_ThenFail() throws JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();
         List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
@@ -231,7 +226,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InValidCredentialDetails_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InValidCredentialDetails_ThenFail() throws JsonProcessingException {
 
         VCRequestDto vcRequestDto=new VCRequestDto();
         List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
@@ -265,7 +260,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void initialize_ValidDetails_ThenPass() throws IOException, VCIExchangeException {
+    public void initialize_ValidDetails_ThenPass() throws VCIExchangeException {
         File file = new File("src/test/resources/InsuranceCredential.json");
         String credentialPath = "file:/" + file.getAbsolutePath();
         Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(credentialPath);
@@ -273,7 +268,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void initialize_InValidPropertyDetails_ThenPass() throws IOException, VCIExchangeException {
+    public void initialize_InValidPropertyDetails_ThenPass()  {
 
         Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(null);
         try{
@@ -284,7 +279,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InvalidContextURL_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InvalidContextURL_ThenFail() throws  JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();
         List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
@@ -312,7 +307,7 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
-    public void getVerifiableCredentialWithLinkedDataProof_InvalidTemplate_ThenFail() throws VCIExchangeException, JsonProcessingException {
+    public void getVerifiableCredentialWithLinkedDataProof_InvalidTemplate_ThenFail() throws  JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();
         List<String> contextList=List.of("https://www.w3.org/2018/credentials/examples/v1","https://www.w3.org/2018/credentials/v1");
