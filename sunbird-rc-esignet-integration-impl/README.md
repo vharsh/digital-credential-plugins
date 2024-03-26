@@ -15,6 +15,40 @@ mosip.esignet.integration.key-binder=MockKeyBindingWrapperService
 mosip.esignet.integration.audit-plugin=LoggerAuditService
 mosip.esignet.integration.captcha-validator=GoogleRecaptchaValidatorService
 
+mosip.esignet.vci.key-values={ 'credential_issuer': '${mosip.esignet.vci.identifier}', 	\
+  'credential_endpoint': '${mosipbox.public.url}${server.servlet.path}/vci/credential', \
+  'credentials_supported': {{\
+  'format': 'ldp_vc',\
+  'id': 'InsuranceCredential', \
+  'scope' : 'sunbird_rc_insurance_vc_ldp',\
+  'cryptographic_binding_methods_supported': {'did:jwk'},\
+  'cryptographic_suites_supported': {'Ed25519Signature2020'},\
+  'proof_types_supported': {'jwt'},\
+  'credential_definition': {\
+  'type': {'VerifiableCredential'},\
+  'credentialSubject': {\
+  'fullName': {'display': {{'name': 'Name','locale': 'en'}}}, \
+  'mobile': {'display': {{'name': 'Phone Number','locale': 'en'}}},\
+  'dob': {'display': {{'name': 'Date of Birth','locale': 'en'}}},\
+  'gender': {'display': {{'name': 'Gender','locale': 'en'}}},\
+  'benefits': {'display': {{'name': 'Benefits','locale': 'en'}}},\
+  'email': {'display': {{'name': 'Email Id','locale': 'en'}}},\
+  'policyIssuedOn': {'display': {{'name': 'Policy Issued On','locale': 'en'}}},\
+  'policyExpiresOn': {'display': {{'name': 'Policy Expires On','locale': 'en'}}},\
+  'policyName': {'display': {{'name': 'Policy Name','locale': 'en'}}},\
+  'policyNumber': {'display': {{'name': 'Policy Number','locale': 'en'}}}\
+   }},\
+  'display': {{'name': 'Sunbird RC Insurance Verifiable Credential', \
+                'locale': 'en', \
+                'logo': {'url': 'https://sunbird.org/images/sunbird-logo-new.png',\
+                'alt_text': 'a square logo of a Sunbird'},\
+                'background_color': '#FDFAF9',\
+                'text_color': '#7C4616'}},\
+  'order' : {'fullName','policyName','policyExpiresOn','policyIssuedOn','policyNumber','mobile','dob','gender','benefits','email'}\
+  \ }},\
+  'display': {{'name': 'Insurance', 'locale': 'en'}}\
+  }
+
 ##---------------------------------Sunbird-RC Plugin Configurations------------------------------------------------------------##
 mosip.esinet.sunbird-rc.base-url=http://localhost
 mosip.esignet.authenticator.default.auth-factor.kba.field-details={{'id':'policyNumber', 'type':'text', 'format':''},{'id':'name', 'type':'text', 'format':''},{'id':'dob', 'type':'date', 'format':'dd/mm/yyyy'}}
