@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -261,11 +262,15 @@ public class SunbirdRCVCIssuancePluginTest {
 
     @Test
     public void initialize_ValidDetails_ThenPass() throws VCIExchangeException {
-        File file = new File("src/test/resources/InsuranceCredential.json");
-        String credentialPath = "file:/" + file.getAbsolutePath();
+        URL credentialUrl = getClass().getClassLoader().getResource("InsuranceCredential.json");
+        if (credentialUrl == null) {
+            throw new VCIExchangeException("InsuranceCredential.json not found in classpath");
+        }
+        String credentialPath = credentialUrl.toString();
         Mockito.when(environment.getProperty(Mockito.anyString())).thenReturn(credentialPath);
         sunbirdRCVCIssuancePlugin.initialize();
     }
+
 
     @Test
     public void initialize_InValidPropertyDetails_ThenPass()  {
