@@ -50,6 +50,7 @@ mosip.esignet.vci.key-values={ 'credential_issuer': '${mosip.esignet.vci.identif
   }
 
 ##---------------------------------Sunbird-RC Plugin Configurations------------------------------------------------------------##
+
 mosip.esinet.sunbird-rc.base-url=http://localhost
 mosip.esignet.authenticator.default.auth-factor.kba.field-details={{'id':'policyNumber', 'type':'text', 'format':''},{'id':'name', 'type':'text', 'format':''},{'id':'dob', 'type':'date', 'format':'dd/mm/yyyy'}}
 mosip.esignet.authenticator.default.auth-factor.kba.individual-id-field=policyNumber
