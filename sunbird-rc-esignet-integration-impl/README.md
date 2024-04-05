@@ -1,11 +1,11 @@
 # sunbird-rc-esignet-integration-impl
 
-## About
-Implementation for Authenticator, VCIssuancePlugin interfaces defined in esignet-integration-api. This library is built as a integration for [sunbird-registry-system](https://github.com/Sunbird-RC) service.
+## Overview
+This library project implements Authenticator and VCIssuancePlugin interfaces defined in esignet-integration-api for integrating eSignet with [sunbird-registry](https://github.com/Sunbird-RC) system.
 
-This library should be added as a runtime dependency to [esignet-service](https://github.com/mosip/esignet)
+This library should be added as a runtime dependency to [esignet-service](https://github.com/mosip/esignet).
 
-## Below configurations should be updated to configure the Sunbird RC plugins in eSignet
+## Below configurations should be updated in eSignet property file to configure the Sunbird RC plugins
 
 ````
 mosip.esignet.integration.scan-base-package=io.mosip.esignet.sunbirdrc.integration
@@ -22,7 +22,15 @@ mosip.esignet.integration.captcha-validator=GoogleRecaptchaValidatorService
 
 ````
 
-## Below configuration need to be updated based on specific usecase (Sample values are based on Insurance usecase)
+## Insurance policy Verifiable Credential (VC) download (Sample usecase)
+
+End user opens her Holder Wallet with the intent of obtaining a digital insurance card. She finds her insurance provider/issuer and selects the issuer. Provider/Issuer asks her to log in with her insurance policy details. She is notified of the successful creation of the digital insurance card (real-time VC issuance) in the wallet. She can view, download, print and share the credentials.
+
+### End to end sequence flow
+
+![Image Not Found](../docs/usecase-insurance-kba-sequence-diagram.png "Insurance policy VC download usecase end to end flow")
+
+### Configuration need to be updated in eSignet property file for the above use case
 
 ````
 mosip.esignet.vci.key-values={\
@@ -196,7 +204,6 @@ mosip.esignet.vciplugin.sunbird-rc.credential-type.LifeInsuranceCredential.cred-
 mosip.esignet.vciplugin.sunbird-rc.credential-type.LifeInsuranceCredential.cred-schema-version=1.0.0
 mosip.esignet.vciplugin.sunbird-rc.credential-type.LifeInsuranceCredential.registry-search-url=http://10.3.148.107/registry/api/v1/Insurance/search
 ````
-
 
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
