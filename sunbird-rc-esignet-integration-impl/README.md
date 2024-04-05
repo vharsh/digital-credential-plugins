@@ -153,7 +153,7 @@ mosip.esignet.vci.key-values={\
 ##---------------------------------Sunbird-RC Plugin Configurations------------------------------------------------------------##
 
 # Base url of registry system 
-mosip.esinet.sunbird-rc.base-url=http://localhost
+mosip.esignet.sunbird-rc.base-url=http://localhost
 
 # Mandatory fields details that are required for KBA based authentication
 mosip.esignet.authenticator.sunbird-rc.auth-factor.kba.field-details={{"id":"policyNumber", "type":"text", "format":""},{"id":"fullName", "type":"text", "format":""},{"id":"dob", "type":"date", "format":"dd/mm/yyyy"}}
@@ -167,7 +167,7 @@ mosip.esignet.authenticator.sunbird-rc.kba.entity-id-field=osid
 mosip.esignet.vciplugin.sunbird-rc.enable-psut-based-registry-search=false
 
 # Sunbird Url for the verifiable credential generation
-mosip.esignet.vciplugin.sunbird-rc.issue-credential-url=${mosip.esinet.sunbird-rc.base-url}/credential/credentials/issue
+mosip.esignet.vciplugin.sunbird-rc.issue-credential-url=${mosip.esignet.sunbird-rc.base-url}/credential/credentials/issue
 # Specifies the types of verifiable credentials supported by the system.
 # Based on the supported credentiels type the subsequent properties are defined 
 mosip.esignet.vciplugin.sunbird-rc.supported-credential-types=InsuranceCredential,LifeInsuranceCredential
@@ -175,13 +175,13 @@ mosip.esignet.vciplugin.sunbird-rc.supported-credential-types=InsuranceCredentia
 # Properties for the Insurance Credential
 
 # Url for object based registry search
-mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-search-url=${mosip.esinet.sunbird-rc.base-url}/registry/api/v1/Insurance/search
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-search-url=${mosip.esignet.sunbird-rc.base-url}/registry/api/v1/Insurance/search
 # VC issuer DID, same will be replaced in subject id field before credential generation
 mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.static-value-map.issuerId=did:web:holashchand.github.io:test_project:32b08ca7-9979-4f42-aacc-1d73f3ac5322
 # template url which will point to the Velocity template configured for this credential type
 mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.template-url=${spring_config_url_env}/*/${active_profile_env}/${spring_config_label_env}/insurance-credential.json
 # Sunbird Url to get registry object based on the entity id
-mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-get-url=${mosip.esinet.sunbird-rc.base-url}/registry/api/v1/Insurance/
+mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.registry-get-url=${mosip.esignet.sunbird-rc.base-url}/registry/api/v1/Insurance/
 # schema id for this VC type that is configured in Sunbird C
 mosip.esignet.vciplugin.sunbird-rc.credential-type.InsuranceCredential.cred-schema-id=did:schema:0d10a2cf-94de-4ffc-b32c-4f1a61ee05ba
 # schema version for this VC type that is configured in Sunbird C
@@ -198,10 +198,8 @@ mosip.esignet.vciplugin.sunbird-rc.credential-type.LifeInsuranceCredential.regis
 ````
 
 
-Add "bindingtransaction" cache name in "mosip.esignet.cache.names" property.
-
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
-This integration plugin is compatible with [eSignet 1.2.0](https://github.com/mosip/esignet/tree/v1.2.0) and [Sunbird-RC 1.0.0](https://github.com/Sunbird-RC/sunbird-rc-core/tree/v1.0.0)
+This integration plugin is compatible with [eSignet 1.4.0](https://github.com/mosip/esignet/tree/v1.4.0) and [Sunbird-RC 1.0.0](https://github.com/Sunbird-RC/sunbird-rc-core/tree/v1.0.0)
 
 
