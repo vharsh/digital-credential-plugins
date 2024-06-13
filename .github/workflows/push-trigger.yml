@@ -106,7 +106,7 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   build-maven-mosipid-certify-integration-impl:
-    uses: mosip/kattu/.github/workflows/maven-build.yml@master
+    uses: mosip/kattu/.github/workflows/maven-build.yml@master-java21
     with:
       SERVICE_LOCATION: mosipid-certify-integration-impl
       BUILD_ARTIFACT: mosipid-certify-integration-impl
