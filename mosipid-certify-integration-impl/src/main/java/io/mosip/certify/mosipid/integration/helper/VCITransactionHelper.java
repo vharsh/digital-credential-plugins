@@ -5,7 +5,7 @@
  */
 package io.mosip.certify.mosipid.integration.helper;
 
-import io.mosip.certify.mosipid.integration.dto.OIDCTransaction;
+import io.mosip.esignet.core.dto.OIDCTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;

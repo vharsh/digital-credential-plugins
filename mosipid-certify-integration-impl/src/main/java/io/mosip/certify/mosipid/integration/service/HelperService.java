@@ -25,7 +25,7 @@ import java.util.Base64;
 public class HelperService {
 
     public static final String UTC_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    public static final String OIDC_PARTNER_APP_ID = "OIDC_PARTNER";
+    public static final String OIDC_PARTNER_APP_ID = "CERTIFY_PARTNER";
     private static Base64.Encoder urlSafeEncoder;
 
     static {
