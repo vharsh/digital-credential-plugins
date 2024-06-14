@@ -1,6 +1,6 @@
 package io.mosip.certify.mosipid.integration.helper;
 
-import io.mosip.certify.mosipid.integration.dto.OIDCTransaction;
+import io.mosip.esignet.core.dto.OIDCTransaction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,6 +38,11 @@ public class VCITransactionHelperTest {
     @Test
     public void getOAuthTransactionWithInValidDetails_thenFail() {
         try{
+            ReflectionTestUtils.setField(vciTransactionHelper, "userinfoCache", "test");
+            OIDCTransaction oidcTransaction = new OIDCTransaction();
+            oidcTransaction.setTransactionId("test");
+            Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
+            Mockito.when(cache.get("test",OIDCTransaction.class)).thenReturn(oidcTransaction);
             vciTransactionHelper.getOAuthTransaction("test");
         }catch (Exception e){
             assert(e.getMessage().equals("cache_missing"));

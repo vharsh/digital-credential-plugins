@@ -20,6 +20,7 @@ import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.api.util.ErrorConstants;
 import io.mosip.certify.mosipid.integration.dto.*;
 import io.mosip.certify.mosipid.integration.helper.VCITransactionHelper;
+import io.mosip.esignet.core.dto.OIDCTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -49,7 +50,7 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 	private static final String ACCESS_TOKEN_HASH = "accessTokenHash";
 	public static final String SIGNATURE_HEADER_NAME = "signature";
 	public static final String AUTHORIZATION_HEADER_NAME = "Authorization";
-	public static final String OIDC_SERVICE_APP_ID = "OIDC_SERVICE";
+	public static final String OIDC_SERVICE_APP_ID = "CERTIFY_SERVICE";
 	public static final String AES_CIPHER_FAILED = "aes_cipher_failed";
 	public static final String NO_UNIQUE_ALIAS = "no_unique_alias";
 
