@@ -20,7 +20,7 @@ on:
       - develop
       - MOSIP*
       - release*
-      - INJICERT-189
+      - INJICERT*
 
 jobs:
   build-maven-sunbird-rc-esignet-integration-impl:
