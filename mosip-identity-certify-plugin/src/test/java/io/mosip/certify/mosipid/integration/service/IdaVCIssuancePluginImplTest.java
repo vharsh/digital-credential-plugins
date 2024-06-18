@@ -1,3 +1,8 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 package io.mosip.certify.mosipid.integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +40,6 @@ import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static io.mosip.certify.mosipid.integration.service.IdaVCIssuancePluginImpl.AES_CIPHER_FAILED;
 import static io.mosip.kernel.keymanagerservice.constant.KeymanagerConstant.CURRENTKEYALIAS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -296,7 +300,7 @@ public class IdaVCIssuancePluginImplTest {
             cipher.init(Cipher.ENCRYPT_MODE,key);
             return Base64.getUrlEncoder().withoutPadding().encodeToString(cipher.doFinal(secretDataBytes, 0, secretDataBytes.length));
         } catch(Exception e) {
-            throw new CertifyException(AES_CIPHER_FAILED);
+            throw new CertifyException(IdaVCIssuancePluginImpl.AES_CIPHER_FAILED);
         }
     }
 

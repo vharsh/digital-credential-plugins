@@ -1,3 +1,8 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 package io.mosip.certify.mosipid.integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -5,9 +10,9 @@ import io.mosip.certify.api.dto.AuditDTO;
 import io.mosip.certify.api.spi.AuditPlugin;
 import io.mosip.certify.api.util.Action;
 import io.mosip.certify.api.util.ActionStatus;
+import io.mosip.certify.mosipid.integration.helper.AuthTransactionHelper;
 import io.mosip.certify.mosipid.integration.dto.AuditRequest;
 import io.mosip.certify.mosipid.integration.dto.AuditResponse;
-import io.mosip.certify.mosipid.integration.helper.AuthTransactionHelper;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.http.RequestWrapper;
 import io.mosip.kernel.core.http.ResponseWrapper;

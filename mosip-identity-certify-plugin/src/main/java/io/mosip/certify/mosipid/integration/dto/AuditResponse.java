@@ -7,19 +7,9 @@ package io.mosip.certify.mosipid.integration.dto;
 
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 @Data
-public class CredentialDefinitionDTO {
+public class AuditResponse {
+
+	private boolean status;
 	
-	/**  */
-	private Map<String, Object> credentialSubject;
-
-	/**  */
-	private List<String> type;
-
-	/** */
-	private List<String> context;
-
 }

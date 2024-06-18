@@ -1,3 +1,8 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 package io.mosip.certify.mosipid.integration.helper;
 
 import io.mosip.esignet.core.dto.OIDCTransaction;
@@ -32,17 +37,11 @@ public class VCITransactionHelperTest {
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(cache.get("test",OIDCTransaction.class)).thenReturn(oidcTransaction);
         vciTransactionHelper.getOAuthTransaction("test");
-
     }
 
     @Test
     public void getOAuthTransactionWithInValidDetails_thenFail() {
         try{
-            ReflectionTestUtils.setField(vciTransactionHelper, "userinfoCache", "test");
-            OIDCTransaction oidcTransaction = new OIDCTransaction();
-            oidcTransaction.setTransactionId("test");
-            Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
-            Mockito.when(cache.get("test",OIDCTransaction.class)).thenReturn(oidcTransaction);
             vciTransactionHelper.getOAuthTransaction("test");
         }catch (Exception e){
             assert(e.getMessage().equals("cache_missing"));

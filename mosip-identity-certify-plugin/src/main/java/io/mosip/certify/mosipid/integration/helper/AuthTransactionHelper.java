@@ -1,3 +1,8 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 package io.mosip.certify.mosipid.integration.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,8 +29,6 @@ import java.time.LocalDateTime;
 public class AuthTransactionHelper {
 	
     private static final String AUTH_TOKEN_CACHE = "authtokens";
-	
-    public static final String AUTH_TOKEN_CACHE_KEY = "auth_token";
 
     @Autowired
     private ObjectMapper objectMapper;
