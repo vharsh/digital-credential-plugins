@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package io.mosip.certify.integration.service;
+package io.mosip.certify.mosipid.integration.service;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -18,11 +18,11 @@ import io.mosip.certify.api.dto.VCResult;
 import io.mosip.certify.api.spi.VCIssuancePlugin;
 import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.api.util.ErrorConstants;
-import io.mosip.certify.integration.dto.CredentialDefinitionDTO;
-import io.mosip.certify.integration.dto.IdaResponseWrapper;
-import io.mosip.certify.integration.dto.IdaVcExchangeRequest;
-import io.mosip.certify.integration.dto.IdaVcExchangeResponse;
-import io.mosip.certify.integration.helper.VCITransactionHelper;
+import io.mosip.certify.mosipid.integration.dto.CredentialDefinitionDTO;
+import io.mosip.certify.mosipid.integration.dto.IdaResponseWrapper;
+import io.mosip.certify.mosipid.integration.dto.IdaVcExchangeRequest;
+import io.mosip.certify.mosipid.integration.dto.IdaVcExchangeResponse;
+import io.mosip.certify.mosipid.integration.helper.VCITransactionHelper;
 import io.mosip.esignet.core.dto.OIDCTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

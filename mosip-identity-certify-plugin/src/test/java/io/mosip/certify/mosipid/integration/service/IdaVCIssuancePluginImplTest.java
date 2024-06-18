@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package io.mosip.certify.integration.service;
+package io.mosip.certify.mosipid.integration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import foundation.identity.jsonld.JsonLDObject;
@@ -11,10 +11,10 @@ import io.mosip.certify.api.dto.VCRequestDto;
 import io.mosip.certify.api.dto.VCResult;
 import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.core.exception.CertifyException;
-import io.mosip.certify.integration.dto.IdaResponseWrapper;
-import io.mosip.certify.integration.dto.IdaVcExchangeRequest;
-import io.mosip.certify.integration.dto.IdaVcExchangeResponse;
-import io.mosip.certify.integration.helper.VCITransactionHelper;
+import io.mosip.certify.mosipid.integration.dto.IdaResponseWrapper;
+import io.mosip.certify.mosipid.integration.dto.IdaVcExchangeRequest;
+import io.mosip.certify.mosipid.integration.dto.IdaVcExchangeResponse;
+import io.mosip.certify.mosipid.integration.helper.VCITransactionHelper;
 import io.mosip.esignet.core.dto.OIDCTransaction;
 import io.mosip.kernel.core.keymanager.spi.KeyStore;
 import io.mosip.kernel.keymanagerservice.entity.KeyAlias;

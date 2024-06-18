@@ -3,13 +3,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package io.mosip.certify.integration.dto;
+package io.mosip.certify.mosipid.integration.dto;
 
 import lombok.Data;
 
 @Data
-public class AuditResponse {
+public class IdaError {
 
-	private boolean status;
-	
+    private String actionMessage;
+    private String errorCode;
+    private String errorMessage;
 }

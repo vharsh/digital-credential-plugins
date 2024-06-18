@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package io.mosip.certify.integration.helper;
+package io.mosip.certify.mosipid.integration.helper;
 
 import io.mosip.esignet.core.dto.OIDCTransaction;
 import org.junit.Test;
@@ -37,7 +37,6 @@ public class VCITransactionHelperTest {
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(cache.get("test",OIDCTransaction.class)).thenReturn(oidcTransaction);
         vciTransactionHelper.getOAuthTransaction("test");
-
     }
 
     @Test
