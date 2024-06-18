@@ -12,6 +12,7 @@ import io.mosip.kernel.core.http.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
+@ConditionalOnProperty(value = "mosip.certify.integration.vci-plugin", havingValue = "IdaVCIssuancePluginImpl")
 public class AuthTransactionHelper {
 	
     private static final String AUTH_TOKEN_CACHE = "authtokens";
