@@ -17,7 +17,7 @@ on:
       - '!release-branch'
       - master
       - 1.*
-      - develop
+      - develop*
       - MOSIP*
       - release*
       - INJICERT*
@@ -105,7 +105,7 @@ jobs:
       GPG_SECRET: ${{ secrets.GPG_SECRET }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
- build-maven-mosipid-certify-integration-impl:
+  build-maven-mosipid-certify-integration-impl:
     uses: mosip/kattu/.github/workflows/maven-build.yml@master-java21
     with:
       SERVICE_LOCATION: mosipid-certify-integration-impl
