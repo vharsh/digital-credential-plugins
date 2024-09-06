@@ -1,0 +1,36 @@
+##Here we are injecting DateTool instance from java velocity library to set the expiry date
+#set( $defaultLocale = $date.getLocale() )
+#set( $calenderNow = $date.getCalendar() )
+#set( $ISO8601DateTimeWithMillisUTC = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" )
+## Adding no. of Days we want to set as expiry, here '5' represent Day and '30' represent no. of days
+#set( $expiry =$calenderNow.add(5, 30))
+#set( $formattedPolicyIssuedOn = $date.toDate($ISO8601DateTimeWithMillisUTC, ${policyIssuedOn}))
+#set( $formattedPolicyExpiresOn = $date.toDate($ISO8601DateTimeWithMillisUTC, ${policyExpiresOn}))
+{
+"@context": [
+"https://www.w3.org/ns/credentials/v2",
+"${context}",
+{
+"SchoolTemplate": {
+"@id":"SchoolCertificate"
+}
+}
+],
+"type": [
+"VerifiableCredential",
+"SchoolCertificate"
+],
+"issuer": "${issuerId}",
+"validFrom": "${date.format($ISO8601DateTimeWithMillisUTC, $calenderNow, $defaultLocale)}",
+"credentialSubject": {
+    "foundingDate": "${dob}",
+    "city": "${city}",
+    "amenities": #if($amenities)$amenities#else#set($amenities = '"[]"') $amenities#end,
+    "name": "${name}",
+    "principalName": "${principalName}",
+    "schoolType": "${schoolType}",
+    "country": "${country}",
+    "schoolRegistrationNumber": "${policyName}",
+    "policyNumber": "${policyNumber}"
+}
+}
