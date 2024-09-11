@@ -1,6 +1,5 @@
 package io.mosip.certify.vcdatamodel.templating;
 
-import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -10,5 +9,6 @@ import java.util.Map;
  * - VC 2.0 data model templating engine
  */
 public interface VCDataModelFormatter {
-    JSONObject format(Map<String, Object> templateInput);
+    // TODO: Change it to JSONObject
+    String format(Map<String, Object> templateInput);
 }

@@ -1,17 +1,26 @@
 package io.mosip.certify.vcdatamodel.templating.impl;
 
+import com.google.common.annotations.Beta;
 import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.vcdatamodel.templating.VCDataModelFormatter;
 import jakarta.annotation.PostConstruct;
+import jakarta.json.JsonObject;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -24,20 +33,23 @@ import java.util.Map;
 public class VCDataModel2 implements VCDataModelFormatter {
     VelocityEngine engine;
 
-    @PostConstruct
-    public void initialize() throws VCIExchangeException {
+    public VCDataModel2() {
         engine = new VelocityEngine();
         // TODO: Load a VM file from classpath & Spring config server conditionally.
         URLResourceLoader urlResourceLoader = new URLResourceLoader() {
             @Override
             public InputStream getResourceStream(String name) throws ResourceNotFoundException {
                 try {
+                    /*
                     URL url = new URL(name);
                     URLConnection connection = url.openConnection();
-                    return connection.getInputStream();
+                     */
+                    InputStream i = new FileInputStream("/Users/harshvardhan/work/mosip/digital-credential-plugins/vcdatamodel/src/main/resources/SchoolTemplate.vm");
+                    return i;
                 } catch (IOException e) {
-                    throw new ResourceNotFoundException("Unable to find resource '" + name + "'");
+                    // throw new ResourceNotFoundException("Unable to find resource '" + name + "'");
                 }
+                return null;
             }
         };
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "url");
@@ -47,7 +59,13 @@ public class VCDataModel2 implements VCDataModelFormatter {
     }
 
     @Override
-    public JSONObject format(Map<String, Object> templateInput) {
-        return null;
+    public String format(Map<String, Object> templateInput) {
+        Template template = engine.getTemplate("https://gist.githubusercontent.com/vharsh/b0c67b1e344fe4d957d4a5728c6efde1/raw/7ddec300243f5f81c35285acb57e2538cf3f370f/schooltemplate2.vm");
+        // create context
+        StringWriter writer = new StringWriter();
+        VelocityContext context = new VelocityContext(templateInput);
+        template.merge(context, writer);
+        // TODO: Convert this to a JSONObject and see if array elements are quoted.
+        return writer.toString();
+        }
     }
-}
