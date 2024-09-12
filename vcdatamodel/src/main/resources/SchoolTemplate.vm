@@ -11,6 +11,7 @@
 "SchoolCertificate"
 ],
 "validFrom": "${validFrom}",
+"issuer": "${issuer}",
 #if($validUntil)
 "validUntil": "${validUntil}",
 #end

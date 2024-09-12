@@ -1,28 +1,18 @@
 package io.mosip.certify.vcdatamodel.templating.impl;
 
-import com.google.common.annotations.Beta;
-import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.vcdatamodel.templating.VCDataModelFormatter;
-import jakarta.annotation.PostConstruct;
-import jakarta.json.JsonObject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
 
 /**

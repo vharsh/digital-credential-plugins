@@ -31,7 +31,7 @@ public class TempApp {
         data.put("validFrom", getUTCDateTime(0));
         // data.put("validUntil", getUTCDateTime(1));
         data.put("context", "https://vharsh.github.io/DID/SchoolCredential.json");
-        data.put("issuerId", "ICSE");
+        data.put("issuer", "https://vharsh.github.io/DID/mock-controller.json");
         data.put("dob", "01/01/2000");
         data.put("city", "Bangalore");
         // new JSONArray((List<String>) value)
@@ -63,7 +63,7 @@ public class TempApp {
                         .atZone(ZoneId.systemDefault()).toInstant());
         LdProof vcLdProof = LdProof.builder().defaultContexts(false).defaultTypes(false).type("RsaSignature2018")
                 .created(validFrom).proofPurpose("assertionMethod")
-                .verificationMethod(URI.create(""))
+                .verificationMethod(URI.create("https://vharsh.github.io/DID/mock-public-key.json"))
                 // ^^ Why is this pointing to JWKS URL of eSignet??
                 .build();
         // 1. Canonicalize

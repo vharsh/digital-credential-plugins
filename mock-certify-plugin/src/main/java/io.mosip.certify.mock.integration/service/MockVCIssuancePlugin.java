@@ -132,7 +132,6 @@ public class MockVCIssuancePlugin implements VCIssuancePlugin {
 		verCredJsonObject.put("issuer", "did:example:123456789");
 		verCredJsonObject.put("issuanceDate", getUTCDateTime());
 		verCredJsonObject.put("credentialSubject", formattedMap);
-
 		JsonLDObject vcJsonLdObject = JsonLDObject.fromJsonObject(verCredJsonObject);
 		vcJsonLdObject.setDocumentLoader(confDocumentLoader);
 		// vc proof
