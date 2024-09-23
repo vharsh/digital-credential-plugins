@@ -31,7 +31,7 @@ public class TempApp {
         data.put("validFrom", getUTCDateTime(0));
         // data.put("validUntil", getUTCDateTime(1));
         data.put("context", "https://vharsh.github.io/DID/SchoolCredential.json");
-        data.put("issuer", "https://vharsh.github.io/DID/mock-controller.json");
+        data.put("issuer", "https://vharsh.github.io/DID/mock-controller2.json");
         data.put("dob", "01/01/2000");
         data.put("city", "Bangalore");
         // new JSONArray((List<String>) value)
@@ -61,9 +61,9 @@ public class TempApp {
                         .parse((String) data.get("validFrom"),
                                 DateTimeFormatter.ofPattern(UTC_DATETIME_PATTERN))
                         .atZone(ZoneId.systemDefault()).toInstant());
-        LdProof vcLdProof = LdProof.builder().defaultContexts(false).defaultTypes(false).type("RsaSignature2018")
+        LdProof vcLdProof = LdProof.builder().defaultContexts(false).defaultTypes(false).type("Ed25519Signature2018")
                 .created(validFrom).proofPurpose("assertionMethod")
-                .verificationMethod(URI.create("https://vharsh.github.io/DID/mock-public-key.json"))
+                .verificationMethod(URI.create("https://vharsh.github.io/DID/mock-public-key2.json"))
                 // ^^ Why is this pointing to JWKS URL of eSignet??
                 .build();
         // 1. Canonicalize
@@ -94,15 +94,15 @@ public class TempApp {
         req.put("version", "1.0");
         Map<String, Object> re = new HashMap<>();
         re.put("dataToSign", vcEncodedData);
-        re.put("applicationId", "CERTIFY_MOCK");
-        re.put("referenceId", "");
+        re.put("applicationId", "CERTIFY_MOCK_ED25519");
+        re.put("referenceId", "ED25519_SIGN");
         re.put("includePayload", false);
         re.put("includeCertificate", false);
         re.put("includeCertHash", true);
         re.put("certificateUrl", "");
         re.put("validateJson", false);
         re.put("b64JWSHeaderParam", false);
-        re.put("signAlgorithm", "RS256");
+        re.put("signAlgorithm", "EdDSA");
         req.put("request", re);
 
         String jsonBody = null;
@@ -114,7 +114,7 @@ public class TempApp {
         }
         String code = "[REDACTED]";
         Request r = new Request.Builder()
-                .url("https://api-internal.dev1.mosip.net/v1/keymanager/jwsSign")
+                .url("https://api-internal.dev.mosip.net/v1/keymanager/jwsSign")
                 .addHeader("Authorization", code)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Cookie", "state=335e1ee7-6ec6-4c9a-9a84-5eec2c6be186; Authorization=[REDACTED]")
