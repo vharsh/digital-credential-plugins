@@ -4,6 +4,7 @@ import foundation.identity.jsonld.JsonLDObject;
 import io.mosip.certify.api.dto.VCRequestDto;
 import io.mosip.certify.api.dto.VCResult;
 import io.mosip.certify.api.exception.VCIExchangeException;
+import io.mosip.certify.core.dto.ParsedAccessToken;
 import io.mosip.esignet.core.dto.OIDCTransaction;
 import io.mosip.kernel.signature.dto.JWTSignatureResponseDto;
 import io.mosip.kernel.signature.service.SignatureService;
