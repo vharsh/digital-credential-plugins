@@ -46,7 +46,6 @@
         <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
         <maven.jacoco.version>0.8.11</maven.jacoco.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-        <kernel-keymanager-service.version>1.3.0-beta.1</kernel-keymanager-service.version>
     </properties>
 
     <dependencies>
@@ -62,55 +61,12 @@
             <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
+        <!-- TODO: Remove certify-core dependency from all -->
         <dependency>
             <groupId>io.mosip.certify</groupId>
             <artifactId>certify-core</artifactId>
             <version>0.10.0-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.mosip.esignet</groupId>
-            <artifactId>esignet-core</artifactId>
-            <version>1.4.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.mosip.esignet</groupId>
-            <artifactId>esignet-integration-api</artifactId>
-            <version>1.4.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>io.mosip.kernel</groupId>
-            <artifactId>kernel-keymanager-service</artifactId>
-            <version>${kernel-keymanager-service.version}</version>
-            <scope>provided</scope>
-            <classifier>lib</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-starter-sleuth</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.security</groupId>
-                    <artifactId>spring-security-test</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

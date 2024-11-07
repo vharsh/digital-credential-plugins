@@ -1,7 +1,6 @@
 package io.mosip.certify.mockcsvdataprovider.integration.service;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.certify.api.exception.DataProviderExchangeException;
 import io.mosip.certify.api.spi.DataProviderPlugin;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Map;
 
 @ConditionalOnProperty(value = "mosip.certify.integration.data-provider-plugin", havingValue = "MockPostgresDataProviderPlugin")
