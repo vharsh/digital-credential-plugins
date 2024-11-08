@@ -6,6 +6,7 @@ import io.mosip.certify.api.spi.DataProviderPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,8 @@ import java.util.Map;
 public class MockCSVDataProviderPlugin implements DataProviderPlugin {
     @Autowired
     private DataProviderService dataService;
+    @Value("${mosip.certify.mock.vciplugin.id-uri:https://example.com/}")
+    private String id;
 
     @Override
     public JSONObject fetchData(Map<String, Object> identityDetails) throws DataProviderExchangeException {
@@ -25,7 +28,7 @@ public class MockCSVDataProviderPlugin implements DataProviderPlugin {
             if (individualId != null) {
                 JSONObject jsonRes;
                 jsonRes = dataService.fetchDataFromCSVReader(individualId);
-                jsonRes.put("id", "https://vharsh.github.io/farmer.json#FarmerProfileCredential");
+                jsonRes.put("id", id + individualId);
                 return jsonRes;
             }
         } catch (Exception e) {
