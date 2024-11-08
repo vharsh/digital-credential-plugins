@@ -1,6 +1,9 @@
 package io.mosip.certify.mockcsvdataprovider.integration;
 
+import io.mosip.certify.api.exception.DataProviderExchangeException;
 import io.mosip.certify.mockcsvdataprovider.integration.utils.CSVReader;
+import lombok.SneakyThrows;
+import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -11,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -35,28 +39,36 @@ public class CSVReaderTest {
 
     @Test
     public void readCSVDataFromValidFile_thenPass() throws IOException {
-        csvReader.readCSV("test.csv");
+        File f = new File("src/test/resources/test.csv");
+        csvReader.readCSV(f);
         Assert.assertNotNull(dataMap);
         Assert.assertNotNull(dataMap.get("1234567"));
+        List<Map> expected = List.of(Map.of("phone", "9876543210", "name", "John Doe", "individualid", "1234567", "age", "40"));
+        List<Map<String, String>> actual = dataMap.get("1234567");
+        Assert.assertEquals(expected, actual);
+        Assert.assertTrue(expected.equals(actual));
         Assert.assertNotNull(dataMap.get("2345678"));
     }
 
     @Test
     public void readCSVDataFromInvalidFile_thenFail() {
         try {
-            csvReader.readCSV("test_id.csv");
+            File f = new File("test.csv");
+            csvReader.readCSV(f);
         } catch (IOException e) {
             Assert.assertEquals("Unable to find the classpath resource for csv file.", e.getMessage());
         }
     }
 
+    @SneakyThrows
     @Test
-    public void getJsonObjectByValidIdentifier_thenPass() throws JSONException {
+    public void getJsonObjectByValidIdentifier_thenPass() {
         Map<String, List<Map<String, String>>> data = new HashMap<>();
         data.put("1234567", List.of(Map.of("individualid", "1234567", "name", "test", "age", "40", "phone", "98765")));
         ReflectionTestUtils.setField(csvReader, "dataMap", data);
 
-        JSONObject jsonObject = csvReader.getJsonObjectByIdentifier("1234567");
+        JSONObject jsonObject = null;
+        jsonObject = csvReader.getJsonObjectByIdentifier("1234567");
         Assert.assertNotNull(jsonObject);
         Assert.assertEquals("1234567", jsonObject.get("individualid"));
         Assert.assertEquals("test", jsonObject.get("name"));
@@ -69,10 +81,11 @@ public class CSVReaderTest {
         Map<String, List<Map<String, String>>> data = new HashMap<>();
         data.put("1234567", List.of(Map.of("individualid", "1234567", "name", "test", "age", "40", "phone", "98765")));
         ReflectionTestUtils.setField(csvReader, "dataMap", data);
-
+        Assertions.catchThrowable(() -> csvReader.getJsonObjectByIdentifier("12345678"));
+        // TODO: Verify if the ^^ line achieves the same thing as below
         try {
             csvReader.getJsonObjectByIdentifier("12345678");
-        } catch (RuntimeException e) {
+        } catch (DataProviderExchangeException e) {
             Assert.assertEquals("No record found in csv with the provided identifier", e.getMessage());
         }
     }

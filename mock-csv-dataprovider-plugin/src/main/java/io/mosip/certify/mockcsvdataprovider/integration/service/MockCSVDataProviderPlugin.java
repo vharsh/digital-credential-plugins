@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@ConditionalOnProperty(value = "mosip.certify.integration.data-provider-plugin", havingValue = "MockPostgresDataProviderPlugin")
+@ConditionalOnProperty(value = "mosip.certify.integration.data-provider-plugin", havingValue = "MockCSVDataProviderPlugin")
 @Component
 @Slf4j
 public class MockCSVDataProviderPlugin implements DataProviderPlugin {

@@ -26,7 +26,7 @@ public class MockCSVDataProviderPluginTest {
     MockCSVDataProviderPlugin mockIdaDataProviderPlugin = new MockCSVDataProviderPlugin();
 
     @Before
-    public void setup() throws JSONException, IOException {
+    public void setup() throws JSONException, DataProviderExchangeException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("individualId", "1234567");
         jsonObject.put("name", "John Doe");

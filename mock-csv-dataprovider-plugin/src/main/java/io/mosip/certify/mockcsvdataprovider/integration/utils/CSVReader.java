@@ -1,5 +1,6 @@
 package io.mosip.certify.mockcsvdataprovider.integration.utils;
 
+import io.mosip.certify.api.exception.DataProviderExchangeException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -9,7 +10,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component; import java.io.FileReader;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException; import java.util.*;
 
 @Component
@@ -26,14 +30,16 @@ public class CSVReader {
 
     @PostConstruct
     public void init() {
-        // Convert comma-separated fields to
+        // Convert comma-separated fields to Set
+        // TODO: https://stackoverflow.com/questions/56454902/spring-value-with-arraylist-split-and-obtain-the-first-value
+        // We can get all fields in the Set<String> directly
         fieldsToInclude = new HashSet<>(Arrays.asList(includeFields.split(",")));
     }
 
-    public void readCSV(String filePath) throws IOException {
+    public void readCSV(File f) throws IOException {
         try {
-            String absolutePath = new ClassPathResource(filePath).getFile().getPath();
-            try (FileReader reader = new FileReader(absolutePath);
+            // TODO: Eliminate nested try-catch
+            try (FileReader reader = new FileReader(f);
                  CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
                 // Get header names
                 List<String> headers = csvParser.getHeaderNames();
@@ -66,12 +72,12 @@ public class CSVReader {
         }
     }
 
-    public JSONObject getJsonObjectByIdentifier(String identifier) throws JSONException {
+    public JSONObject getJsonObjectByIdentifier(String identifier) throws DataProviderExchangeException, JSONException {
         JSONObject jsonObject = new JSONObject();
         List<Map<String, String>> records = dataMap.get(identifier);
         if(records == null || records.isEmpty()) {
             log.error("No identifier found.");
-            throw new RuntimeException("No record found in csv with the provided identifier");
+            throw new DataProviderExchangeException("No record found in csv with the provided identifier");
         }
         if (records != null && !records.isEmpty()) {
             Map<String, String> record = records.get(0);
