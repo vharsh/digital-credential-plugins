@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MdocGeneratorTest {
     @Test
-    void shouldGenerateMdocDataSuccessfully() {
+    void shouldGenerateMdocDataSuccessfully() throws Exception {
         Map<String, Object> data = new HashMap<>();
         data.put("family_name", "Mock");
         data.put("given_name", "User");
