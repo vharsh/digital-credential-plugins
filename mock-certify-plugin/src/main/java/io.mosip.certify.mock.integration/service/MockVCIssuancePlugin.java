@@ -24,6 +24,7 @@ import io.mosip.certify.api.dto.VCResult;
 import io.mosip.certify.api.exception.VCIExchangeException;
 import io.mosip.certify.api.spi.VCIssuancePlugin;
 import io.mosip.certify.api.util.ErrorConstants;
+import io.mosip.certify.constants.VCFormats;
 import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.util.UUIDGenerator;
 import io.mosip.esignet.core.dto.OIDCTransaction;
@@ -107,7 +108,7 @@ public class MockVCIssuancePlugin implements VCIssuancePlugin {
 			VCResult<JsonLDObject> vcResult = new VCResult<>();
 			vcJsonLdObject = buildJsonLDWithLDProof(identityDetails.get(ACCESS_TOKEN_HASH).toString());
 			vcResult.setCredential(vcJsonLdObject);
-			vcResult.setFormat("ldp_vc");
+			vcResult.setFormat(VCFormats.LDP_VC);
 			return vcResult;
 		} catch (Exception e) {
 			log.error("Failed to build mock VC", e);

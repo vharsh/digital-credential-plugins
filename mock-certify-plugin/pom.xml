@@ -130,6 +130,26 @@
             <version>2.0.12</version>
         </dependency>
         <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-datetime-jvm</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.android.identity</groupId>
+            <artifactId>identity-credential</artifactId>
+            <version>20231002</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>co.nstant.in</groupId>
+            <artifactId>cbor</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
             <groupId>net.javacrumbs.json-unit</groupId>
             <artifactId>json-unit-assertj</artifactId>
             <version>3.4.1</version>
