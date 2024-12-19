@@ -68,7 +68,7 @@ public class MdocGenerator {
         drivingPrivileges.put("issue_date", formattedIssueDate);
         drivingPrivileges.put("expiry_date", formattedExpiryDate);
 
-        data.keySet().forEach(key -> nameSpacedDataBuilder.putEntryString(NAMESPACE, key, data.get(key).toString()));
+        data.keySet().forEach(key -> nameSpacedDataBuilder.putEntryString(NAMESPACE, key, Objects.toString(data.get(key),"")));
 
         NameSpacedData nameSpacedData = nameSpacedDataBuilder.build();
         Map<String, List<byte[]>> generatedIssuerNameSpaces = MdocUtil.generateIssuerNameSpaces(nameSpacedData, new Random(SEED), 16);
