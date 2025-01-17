@@ -67,7 +67,9 @@ generate_keys() {
     echo "Encoding the certificate to Base64..."
     base64EncodedCertificate=$(base64 -i $CERTIFICATE_FILE)
 
-    echo "------Base64 Encoded key||Certificate:"
+    echo "Secret created successfully..."
+    echo "Adding the contents into a file"
+    echo "Note: Make sure to add the generated secret without any newlines in the value, as new lines presence would cause issues when service loads the secret"
     echo -n "$base64EncodedPrivateKey||$base64EncodedCertificate" > issuerSecret.txt
 
     echo "------------------------------------------------------------------------------"
