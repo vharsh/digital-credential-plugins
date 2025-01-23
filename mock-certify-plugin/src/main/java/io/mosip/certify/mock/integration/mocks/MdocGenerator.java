@@ -29,9 +29,23 @@ public class MdocGenerator {
     public static final long SEED = 42L;
     public static final DateTimeFormatter FULL_DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
+    /**
+     * @param data - content of the mdoc
+     * @param holderId - documentNumber of the mDL
+     * @param issuerKeyAndCertificate - Document signet related details
+     * @return
+     * @throws Exception
+     *
+     * As of now, only issuer certificate (DS) is available and its used to sign the mdoc. But as per spec,
+     * DS certificate is signed by the issuing authority’s root CA certificate basically IA creates a certificate chain keeping the
+     *      root = root CA certificate
+     *      leaf = DS certificate
+     * And only the DS certificate is attached to the credential.
+     * Root certificate is not available as of now and is a limitation.
+     */
     public String generate(Map<String, Object> data, String holderId, String issuerKeyAndCertificate) throws Exception {
-        PKCS12Reader pkcs12Reader = new PKCS12Reader();
-        KeyPairAndCertificate issuerDetails = pkcs12Reader.extract(issuerKeyAndCertificate);
+        KeyPairAndCertificateExtractor keyPairAndCertificateExtractor = new KeyPairAndCertificateExtractor();
+        KeyPairAndCertificate issuerDetails = keyPairAndCertificateExtractor.extract(issuerKeyAndCertificate);
 
         if (issuerDetails.keyPair() == null) {
             throw new RuntimeException("Unable to load Crypto details");
@@ -54,9 +68,7 @@ public class MdocGenerator {
         drivingPrivileges.put("issue_date", formattedIssueDate);
         drivingPrivileges.put("expiry_date", formattedExpiryDate);
 
-        for (String key : data.keySet()) {
-            nameSpacedDataBuilder.putEntryString(NAMESPACE, key, data.get(key).toString());
-        }
+        data.keySet().forEach(key -> nameSpacedDataBuilder.putEntryString(NAMESPACE, key, Objects.toString(data.get(key),"")));
 
         NameSpacedData nameSpacedData = nameSpacedDataBuilder.build();
         Map<String, List<byte[]>> generatedIssuerNameSpaces = MdocUtil.generateIssuerNameSpaces(nameSpacedData, new Random(SEED), 16);
